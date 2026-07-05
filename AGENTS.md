@@ -41,6 +41,9 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 
 ## Repo conventions
 
-- Outlines: `articles/drafts/{slug}/outline.md` using `templates/outline-template.md`
-- Style reference: `style/iostom-style-guide.md`
-- Outline prompt: `prompts/01-outline.md`
+- Manifest: `articles/drafts/{slug}/manifest.yaml` — set `channels`, `x_account`, `canonical_url`
+- Outlines: `articles/drafts/{slug}/outline.md` via `prompts/01-outline.md`
+- Drafts: `draft.md` → self-edit → `draft-v2.md` via `prompts/02-draft.md` and `prompts/03-self-edit.md`
+- Exports: `export/{channel}/{slug}.*` via `prompts/04-export-medium.md` through `prompts/07-export-x.md`
+- Style: `style/iostom-style-guide.md` (technical), `style/pokepitchshop-seo-guide.md` (shop blog), `style/x-social-guide.md` (X)
+- Publish: follow `docs/publish-checklist.md`

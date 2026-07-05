@@ -3,6 +3,14 @@ title: "What is Gorilla Mux? (Go HTTP Routing — Part 1)"
 channels:
   - medium
   - tommarler
+  - x
 destination: technical
+x_account: iostom
+canonical_url: null
 series: go-gorilla-mux
-status: draft
+status: exported
+published:
+  medium: null
+  tommarler: null
+  pokepitchshop: null
+  x: null
