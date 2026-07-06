@@ -4,6 +4,10 @@ AI writing agent for technical articles in [iostom's](https://medium.com/@osinti
 
 Linear project: [Draftsmith](https://linear.app/pokepitchshop/project/draftsmith-7075cfe872a1)
 
+GitHub: [github.com/pokepitchshop/Draftsmith](https://github.com/pokepitchshop/Draftsmith)
+
+Local path: `~/Desktop/pokepitchshop/draftsmith`
+
 ## Workflow
 
 | Step | Prompt | Output |
@@ -38,7 +42,35 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `templates/article-template.md` | Full draft structure |
 | `templates/export-*.md` | Export format references |
 | `metrics/articles.yaml` | Per-channel engagement tracking |
+| `references/medium-articles.md` | iostom source article links |
+| `series/` | Multi-part series manifests (POK-374) |
 
 ## Sample article
 
 `articles/drafts/go-gorilla-mux-part-1/` includes outline, draft-v2, manifest, and sample exports in `export/`.
+
+## Repository structure
+
+Bootstrap layout for the Draftsmith writing system (POK-377):
+
+```text
+draftsmith/
+├── AGENTS.md                 # Cursor persona (from Linear iostom prompt)
+├── README.md
+├── style/                    # Voice and export rules
+├── templates/                # Outline, article, manifest, series, export formats
+├── prompts/                  # 01 outline → 06 export (step-by-step Cursor prompts)
+├── articles/
+│   ├── drafts/{slug}/        # outline, draft, draft-v2, manifest.yaml
+│   └── published/            # post-review copies
+├── export/
+│   ├── medium/
+│   ├── tommarler/
+│   └── x/
+├── series/                   # multi-part series manifests
+├── metrics/                  # per-channel engagement (POK-376)
+├── references/               # source article links
+└── docs/                     # publish-checklist.md
+```
+
+Open this folder in Cursor — `AGENTS.md` loads automatically for every session.

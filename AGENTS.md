@@ -47,3 +47,5 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 - Exports: `export/{channel}/{slug}.*` via `prompts/04-export-medium.md` through `prompts/06-export-x.md`
 - Style: `style/iostom-style-guide.md`, `style/x-social-guide.md`
 - Publish: follow `docs/publish-checklist.md`
+- Series: `series/{series-slug}/manifest.yaml` via `templates/series-manifest-template.yaml`
+- References: `references/medium-articles.md`
