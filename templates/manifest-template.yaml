@@ -5,7 +5,8 @@ channels:
   # - tommarler
   # - x
 canonical_url: null             # set after long-form publish
-series: null                    # or series slug
+series: null                    # or series slug (see series/{slug}/manifest.yaml)
+part: null                      # e.g. 1, 2, 3 when part of a series
 status: draft                   # draft | review | exported | published
 published:
   medium: null

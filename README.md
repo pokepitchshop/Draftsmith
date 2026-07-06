@@ -12,6 +12,7 @@ Local path: `~/Desktop/pokepitchshop/draftsmith`
 
 | Step | Prompt | Output |
 |------|--------|--------|
+| 0. Series plan | `prompts/00-series-plan.md` | `series/{series-slug}/manifest.yaml` |
 | 1. Outline | `prompts/01-outline.md` | `articles/drafts/{slug}/outline.md` |
 | 2. Draft | `prompts/02-draft.md` | `articles/drafts/{slug}/draft.md` |
 | 3. Self-edit | `prompts/03-self-edit.md` | `articles/drafts/{slug}/draft-v2.md` |
@@ -44,7 +45,18 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `templates/export-*.md` | Export format references |
 | `metrics/articles.yaml` | Per-channel engagement tracking |
 | `references/medium-articles.md` | iostom source article links |
-| `series/` | Multi-part series manifests (POK-374) |
+| `docs/series-planning.md` | Multi-part series workflow (POK-374) |
+| `series/` | Series manifests (`series/{slug}/manifest.yaml`) |
+
+## Series planning (POK-374)
+
+For multi-part topics, run `prompts/00-series-plan.md` first. Validate with:
+
+```bash
+node scripts/validate-series.mjs go-gorilla-mux
+```
+
+See [`docs/series-planning.md`](docs/series-planning.md).
 
 ## X export (POK-379)
 
