@@ -41,16 +41,18 @@ Run only the export prompts matching manifest `channels`.
 
 ## X / Twitter
 
+**Guide:** [`docs/x-export.md`](x-export.md)  
 **Prompt:** `prompts/06-export-x.md`  
 **Output:** `export/x/{slug}/thread.md` and `single.md`
 
 **Prerequisite:** `canonical_url` set in manifest from long-form publish.
 
 1. Choose thread or single from export files
-2. Post manually on X as @iostom
-3. Thread: post hook first, reply-chain remaining tweets
-4. Copy tweet/thread URL
-5. Update manifest: `published.x: {url}`
+2. Validate: `node scripts/validate-x-export.mjs {slug}`
+3. Post manually on X as @iostom
+4. Thread: post hook first, reply-chain remaining tweets
+5. Copy tweet/thread URL
+6. Update manifest: `published.x: {url}`
 
 ---
 
