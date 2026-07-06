@@ -51,3 +51,4 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 - Series guide: `docs/series-planning.md`; validate with `node scripts/validate-series.mjs {series-slug}`
 - Part bridges: `templates/series-part-bridge-template.md` for Part 2+ intros/recaps
 - References: `references/medium-articles.md`
+- Link ingest: `node scripts/ingest-link.mjs <url>` → source material markdown (POK-419); see `docs/link-ingestion.md`
