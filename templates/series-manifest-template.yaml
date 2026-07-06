@@ -1,21 +1,24 @@
 # Series: {{SERIES_TITLE}}
 
 slug: {{SERIES_SLUG}}
+title: "{{SERIES_TITLE}}"
 total_parts: {{N}}
 status: planning          # planning | in_progress | complete
+
+payoff_line: "{{WHEN_YOU_FINISH_THIS_SERIES_YOU_WILL_HAVE...}}"
 
 parts:
   - part: 1
     slug: {{SERIES_SLUG}}-part-1
     title: "{{PART_1_TITLE}}"
-    status: draft         # draft | review | exported | published
+    status: planned         # planned | draft | review | exported | published
   - part: 2
     slug: {{SERIES_SLUG}}-part-2
     title: "{{PART_2_TITLE}}"
     status: planned
 
 cross_links:
-  - {{RELATED_ARTICLE_URL}}
+  - {{RELATED_ARTICLE_OR_REPO_URL}}
 
 notes: |
-  Optional planning notes for the series arc.
+  Optional planning notes for the series arc, shared repo, and open questions.

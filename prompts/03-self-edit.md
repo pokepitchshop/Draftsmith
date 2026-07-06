@@ -9,6 +9,7 @@ Edit the draft for clarity, accuracy, and voice match. Read:
 1. **Draft:** `articles/drafts/{slug}/draft.md`
 2. **Style:** `style/iostom-style-guide.md`
 3. **Manifest:** `articles/drafts/{slug}/manifest.yaml`
+4. **Series (if applicable):** `series/{series}/manifest.yaml` — verify continuity and sibling links
 
 ## Input
 
@@ -52,6 +53,13 @@ Update manifest: `status: review`
 - [ ] Short paragraphs; break run-on sentences
 - [ ] Recap + series teaser + comment invite + related links at end
 - [ ] Remove any internal editor notes or outline artifacts
+
+### Series (when `series` is set in manifest)
+
+- [ ] Part 2+ opens with a clear callback to the prior article
+- [ ] Series payoff or progress toward payoff is evident
+- [ ] Related links include published sibling parts (omit unpublished)
+- [ ] After saving, update matching part status in `series/{series}/manifest.yaml`
 
 ## Do not
 

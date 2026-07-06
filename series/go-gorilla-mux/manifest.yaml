@@ -1,0 +1,31 @@
+# Series: Go HTTP Routing with Gorilla Mux
+
+slug: go-gorilla-mux
+title: "Go HTTP Routing with Gorilla Mux"
+total_parts: 3
+status: in_progress          # planning | in_progress | complete
+
+payoff_line: "a small REST API with named routes, path variables, subrouters, and middleware — starting from a blank Go module"
+
+parts:
+  - part: 1
+    slug: go-gorilla-mux-part-1
+    title: "What is Gorilla Mux? (Go HTTP Routing — Part 1)"
+    status: exported         # draft | review | exported | published
+  - part: 2
+    slug: go-gorilla-mux-part-2
+    title: "How do subrouters and middleware work in Gorilla Mux? (Part 2)"
+    status: planned
+  - part: 3
+    slug: go-gorilla-mux-part-3
+    title: "How do you structure a production-ready Gorilla Mux API? (Part 3)"
+    status: planned
+
+cross_links:
+  - https://github.com/gorilla/mux
+
+notes: |
+  Part 1: install mux, NewRouter, path variables, curl demos.
+  Part 2: subrouters, middleware chain, organizing handlers.
+  Part 3: graceful shutdown, testing routes, project layout.
+  Reuse one demo repo across all parts; tag commits per part.

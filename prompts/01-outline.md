@@ -8,6 +8,7 @@ Generate a detailed article outline in iostom's voice for the topic below. Follo
 
 1. **Style:** `style/iostom-style-guide.md`
 2. **Structure:** `templates/outline-template.md`
+3. **Series (if applicable):** `series/{series-slug}/manifest.yaml` — read for arc, payoff line, and sibling parts
 
 ## Inputs (fill in before running)
 
@@ -28,7 +29,9 @@ Save the completed outline to:
 articles/drafts/{slug}/outline.md
 ```
 
-If the draft folder does not exist, create it and add a manifest from `templates/manifest-template.yaml`.
+If the draft folder does not exist, create it and add a manifest from `templates/manifest-template.yaml` (set `series` and `part` when applicable).
+
+For **Part 2+**, read the prior part's `draft-v2.md` and use `templates/series-part-bridge-template.md` for opening/closing continuity.
 
 ## Outline rules
 

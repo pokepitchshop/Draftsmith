@@ -10,6 +10,7 @@ Turn the outline into a full draft in iostom's voice. Follow:
 2. **Manifest:** `articles/drafts/{slug}/manifest.yaml`
 3. **Style:** `style/iostom-style-guide.md`
 4. **Structure:** `templates/article-template.md`
+5. **Series (if `series` set in manifest):** `series/{series}/manifest.yaml` and `templates/series-part-bridge-template.md`
 
 ## Input
 
@@ -31,7 +32,9 @@ articles/drafts/{slug}/draft.md
 - Use `##` headings matching the outline's question-style titles.
 - Include real fenced code blocks and CLI commands from the outline.
 - Keep `[Screenshot: ...]` placeholders where the outline specifies them.
-- Include recap, next-part teaser (if series), engagement invite, and related links.
+- For series Part 1: use the series `payoff_line` in the opening.
+- For series Part 2+: open with a callback to the prior part per `templates/series-part-bridge-template.md`.
+- Include recap, next-part teaser (if series), engagement invite, and related links (include published sibling part URLs when available).
 - Do **not** include the outline's "Draft notes" section in the draft.
 - Target the read time from the outline (~2–5 min).
 

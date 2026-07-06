@@ -47,5 +47,7 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 - Exports: `export/{channel}/{slug}.*` via `prompts/04-export-medium.md` through `prompts/06-export-x.md`
 - Style: `style/iostom-style-guide.md`, `style/x-social-guide.md`
 - Publish: follow `docs/publish-checklist.md`
-- Series: `series/{series-slug}/manifest.yaml` via `templates/series-manifest-template.yaml`
+- Series plan: `prompts/00-series-plan.md` → `series/{series-slug}/manifest.yaml`
+- Series guide: `docs/series-planning.md`; validate with `node scripts/validate-series.mjs {series-slug}`
+- Part bridges: `templates/series-part-bridge-template.md` for Part 2+ intros/recaps
 - References: `references/medium-articles.md`

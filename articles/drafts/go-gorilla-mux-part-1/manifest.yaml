@@ -6,6 +6,7 @@ channels:
   - x
 canonical_url: https://tommarler.com/blog/go-gorilla-mux-part-1/
 series: go-gorilla-mux
+part: 1
 status: exported
 published:
   medium: null
