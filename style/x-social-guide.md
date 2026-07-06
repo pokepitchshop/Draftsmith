@@ -1,13 +1,12 @@
 # X / Twitter Social Style Guide
 
-Promotion copy derived from finished articles — not standalone posts.
+Promotion copy derived from finished articles — not standalone posts. All posts use **@iostom** voice.
 
-## Accounts
+## Account
 
-| `x_account` | Handle | Use for |
-|-------------|--------|---------|
-| `iostom` | @osintiostom | Technical tutorials (Medium, tommarler) |
-| `pokepitchshop` | @pokepitchshop | Shop blog posts (pokepitchshop.com) |
+| Handle | Use for |
+|--------|---------|
+| @iostom | Technical tutorials (Medium, tommarler.com) |
 
 ## Formats
 
@@ -29,10 +28,9 @@ Generate **both** formats; pick one at publish time.
 - Every tweet ≤280 characters — count and flag over-limit lines.
 - Link goes in the **last tweet** of a thread (or the single tweet).
 - No hashtag spam — 0–2 relevant tags max.
-- iostom voice: conversational, builder, learning in public.
-- pokepitchshop voice: buyer-friendly, catalog-aware, short hooks.
+- Voice: conversational, builder, learning in public (match `style/iostom-style-guide.md`).
 
 ## Prerequisites
 
 - Set `canonical_url` in manifest after long-form publish.
-- Re-run `prompts/07-export-x.md` if URL was a placeholder during first export.
+- Re-run `prompts/06-export-x.md` if URL was a placeholder during first export.

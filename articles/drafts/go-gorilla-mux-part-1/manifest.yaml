@@ -4,13 +4,10 @@ channels:
   - medium
   - tommarler
   - x
-destination: technical
-x_account: iostom
 canonical_url: null
 series: go-gorilla-mux
 status: exported
 published:
   medium: null
   tommarler: null
-  pokepitchshop: null
   x: null

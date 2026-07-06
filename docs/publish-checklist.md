@@ -39,29 +39,15 @@ Run only the export prompts matching manifest `channels`.
 
 ---
 
-## pokepitchshop.com
-
-**Prompt:** `prompts/06-export-pokepitchshop.md`  
-**Output:** `export/pokepitchshop/{slug}.mdx`
-
-1. Copy export → `pokepitchshop/content/blog/{slug}.mdx`
-2. Add slug to `RELATED_POST_SLUGS` in `lib/blog/posts.ts`
-3. Set `status: "published"` in `lib/blog/content-calendar.ts`
-4. Commit and push → Vercel deploy
-5. Verify `https://pokepitchshop.com/blog/{slug}`
-6. Update manifest: `published.pokepitchshop: {url}` and `canonical_url` if primary
-
----
-
 ## X / Twitter
 
-**Prompt:** `prompts/07-export-x.md`  
+**Prompt:** `prompts/06-export-x.md`  
 **Output:** `export/x/{slug}/thread.md` and `single.md`
 
 **Prerequisite:** `canonical_url` set in manifest from long-form publish.
 
 1. Choose thread or single from export files
-2. Post manually on X (@iostom or @pokepitchshop per `x_account`)
+2. Post manually on X as @iostom
 3. Thread: post hook first, reply-chain remaining tweets
 4. Copy tweet/thread URL
 5. Update manifest: `published.x: {url}`

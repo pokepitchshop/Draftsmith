@@ -3,15 +3,11 @@ title: "{title}"
 channels:
   - medium
   # - tommarler
-  # - pokepitchshop
   # - x
-destination: technical          # technical | pokepitchshop-seo
-x_account: iostom               # iostom | pokepitchshop (when x in channels)
 canonical_url: null             # set after long-form publish
 series: null                    # or series slug
 status: draft                   # draft | review | exported | published
 published:
   medium: null
   tommarler: null
-  pokepitchshop: null
   x: null

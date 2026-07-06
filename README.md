@@ -1,6 +1,6 @@
 # Draftsmith
 
-AI writing agent for technical articles in [iostom's](https://medium.com/@osintiostom) hands-on tutorial style. Exports to Medium, tommarler.com, pokepitchshop.com, and X.
+AI writing agent for technical articles in [iostom's](https://medium.com/@osintiostom) hands-on tutorial style. Exports to Medium, tommarler.com, and X.
 
 Linear project: [Draftsmith](https://linear.app/pokepitchshop/project/draftsmith-7075cfe872a1)
 
@@ -13,8 +13,7 @@ Linear project: [Draftsmith](https://linear.app/pokepitchshop/project/draftsmith
 | 3. Self-edit | `prompts/03-self-edit.md` | `articles/drafts/{slug}/draft-v2.md` |
 | 4. Export | `prompts/04-export-medium.md` | `export/medium/{slug}.md` |
 | | `prompts/05-export-tommarler.md` | `export/tommarler/{slug}.md` |
-| | `prompts/06-export-pokepitchshop.md` | `export/pokepitchshop/{slug}.mdx` |
-| | `prompts/07-export-x.md` | `export/x/{slug}/thread.md` + `single.md` |
+| | `prompts/06-export-x.md` | `export/x/{slug}/thread.md` + `single.md` |
 
 Set channels per article in `articles/drafts/{slug}/manifest.yaml`. Run only export prompts for selected channels.
 
@@ -33,7 +32,6 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 |------|---------|
 | `AGENTS.md` | Persona and voice for Cursor |
 | `style/iostom-style-guide.md` | Technical article voice |
-| `style/pokepitchshop-seo-guide.md` | PPS blog export rules |
 | `style/x-social-guide.md` | X thread/single tweet rules |
 | `templates/manifest-template.yaml` | Per-article channel selection |
 | `templates/outline-template.md` | Outline structure |
