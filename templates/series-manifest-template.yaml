@@ -1,0 +1,21 @@
+# Series: {{SERIES_TITLE}}
+
+slug: {{SERIES_SLUG}}
+total_parts: {{N}}
+status: planning          # planning | in_progress | complete
+
+parts:
+  - part: 1
+    slug: {{SERIES_SLUG}}-part-1
+    title: "{{PART_1_TITLE}}"
+    status: draft         # draft | review | exported | published
+  - part: 2
+    slug: {{SERIES_SLUG}}-part-2
+    title: "{{PART_2_TITLE}}"
+    status: planned
+
+cross_links:
+  - {{RELATED_ARTICLE_URL}}
+
+notes: |
+  Optional planning notes for the series arc.
