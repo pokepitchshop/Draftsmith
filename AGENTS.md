@@ -45,7 +45,7 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 - Outlines: `articles/drafts/{slug}/outline.md` via `prompts/01-outline.md`
 - Drafts: `draft.md` → self-edit → `draft-v2.md` via `prompts/02-draft.md` and `prompts/03-self-edit.md`
 - Exports: `export/{channel}/{slug}.*` via `prompts/04-export-medium.md` through `prompts/06-export-x.md`
-- Style: `style/iostom-style-guide.md`, `style/x-social-guide.md`
+- Style: `style/iostom-style-guide.md` (see `docs/style-guide.md`), `style/x-social-guide.md`
 - Publish: follow `docs/publish-checklist.md`
 - Series plan: `prompts/00-series-plan.md` → `series/{series-slug}/manifest.yaml`
 - Series guide: `docs/series-planning.md`; validate with `node scripts/validate-series.mjs {series-slug}`

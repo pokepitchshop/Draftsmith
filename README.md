@@ -36,7 +36,8 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | Path | Purpose |
 |------|---------|
 | `AGENTS.md` | Persona and voice for Cursor |
-| `style/iostom-style-guide.md` | Technical article voice |
+| `style/iostom-style-guide.md` | Technical article voice (POK-371) |
+| `docs/style-guide.md` | Style guide workflow and self-edit quick reference |
 | `style/x-social-guide.md` | X thread/single tweet rules |
 | `docs/x-export.md` | X export workflow and validation |
 | `templates/manifest-template.yaml` | Per-article channel selection |
@@ -44,7 +45,7 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `templates/article-template.md` | Full draft structure |
 | `templates/export-*.md` | Export format references |
 | `metrics/articles.yaml` | Per-channel engagement tracking |
-| `references/medium-articles.md` | iostom source article links |
+| `references/medium-articles.md` | iostom source article catalog (POK-371) |
 | `docs/series-planning.md` | Multi-part series workflow (POK-374) |
 | `series/` | Series manifests (`series/{slug}/manifest.yaml`) |
 
@@ -57,6 +58,10 @@ node scripts/validate-series.mjs go-gorilla-mux
 ```
 
 See [`docs/series-planning.md`](docs/series-planning.md).
+
+## Style guide (POK-371)
+
+Codified from iostom's Medium articles (Pyenv/Poetry, Gorilla Mux, Python OSINT scraping). See [`docs/style-guide.md`](docs/style-guide.md) and [`style/iostom-style-guide.md`](style/iostom-style-guide.md).
 
 ## X export (POK-379)
 
