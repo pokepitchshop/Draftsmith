@@ -36,10 +36,21 @@ Stop and ask the user to publish long-form first and set `canonical_url`, then r
 
 ## Publish
 
-See `docs/publish-checklist.md` → X section.
+See [`docs/x-export.md`](../docs/x-export.md) and `docs/publish-checklist.md` → X section.
+
+## Validate
+
+After saving exports, run:
+
+```bash
+node scripts/validate-x-export.mjs {slug}
+```
+
+Fix any tweet over 280 characters before posting.
 
 ## Acceptance
 
 - [ ] Thread has hook + value tweets + link tweet
 - [ ] Single tweet ≤280 chars with link
 - [ ] Voice matches iostom style guide
+- [ ] `node scripts/validate-x-export.mjs {slug}` passes

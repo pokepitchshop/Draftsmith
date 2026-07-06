@@ -37,6 +37,7 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `AGENTS.md` | Persona and voice for Cursor |
 | `style/iostom-style-guide.md` | Technical article voice |
 | `style/x-social-guide.md` | X thread/single tweet rules |
+| `docs/x-export.md` | X export workflow and validation |
 | `templates/manifest-template.yaml` | Per-article channel selection |
 | `templates/outline-template.md` | Outline structure |
 | `templates/article-template.md` | Full draft structure |
@@ -44,6 +45,16 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `metrics/articles.yaml` | Per-channel engagement tracking |
 | `references/medium-articles.md` | iostom source article links |
 | `series/` | Multi-part series manifests (POK-374) |
+
+## X export (POK-379)
+
+After long-form publish, set `canonical_url` in the manifest and run `prompts/06-export-x.md`. Validate with:
+
+```bash
+node scripts/validate-x-export.mjs go-gorilla-mux-part-1
+```
+
+See [`docs/x-export.md`](docs/x-export.md).
 
 ## Sample article
 
