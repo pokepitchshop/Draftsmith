@@ -38,6 +38,8 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `AGENTS.md` | Persona and voice for Cursor |
 | `style/iostom-style-guide.md` | Technical article voice (POK-371) |
 | `docs/style-guide.md` | Style guide workflow and self-edit quick reference |
+| `docs/link-ingestion.md` | URL → source material router (POK-419) |
+| `templates/source-material-template.md` | Ingested source material format |
 | `style/x-social-guide.md` | X thread/single tweet rules |
 | `docs/x-export.md` | X export workflow and validation |
 | `templates/manifest-template.yaml` | Per-article channel selection |
@@ -62,6 +64,19 @@ See [`docs/series-planning.md`](docs/series-planning.md).
 ## Style guide (POK-371)
 
 Codified from iostom's Medium articles (Pyenv/Poetry, Gorilla Mux, Python OSINT scraping). See [`docs/style-guide.md`](docs/style-guide.md) and [`style/iostom-style-guide.md`](style/iostom-style-guide.md).
+
+## Link ingestion (POK-419)
+
+Drop a link → clean source markdown for the link-to-article workflow:
+
+```bash
+node scripts/ingest-link.mjs https://github.com/gorilla/mux
+node scripts/ingest-link.mjs <url> --out articles/drafts/{slug}/source-material.md
+```
+
+Python optional (YouTube + trafilatura fallback): `pip install -r scripts/requirements-ingest.txt`
+
+See [`docs/link-ingestion.md`](docs/link-ingestion.md).
 
 ## X export (POK-379)
 
