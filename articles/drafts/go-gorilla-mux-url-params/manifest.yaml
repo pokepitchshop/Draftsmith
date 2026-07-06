@@ -1,0 +1,17 @@
+slug: go-gorilla-mux-url-params
+title: "How do you read URL params with Gorilla Mux?"
+source_url: https://github.com/gorilla/mux
+link_type: github
+angle: "Show path variables with mux.Vars in a tiny Go API"
+channels:
+  - medium
+  - tommarler
+  - x
+canonical_url: null
+series: null
+part: null
+status: draft
+published:
+  medium: null
+  tommarler: null
+  x: null

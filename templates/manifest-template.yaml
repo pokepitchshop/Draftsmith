@@ -1,5 +1,8 @@
 slug: {slug}
 title: "{title}"
+source_url: null                 # set for link-to-article drafts
+link_type: null                  # article | docs | blog | github | youtube (auto-filled by router)
+angle: null                      # optional one-liner steering the draft
 channels:
   - medium
   # - tommarler

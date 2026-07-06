@@ -41,7 +41,9 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 
 ## Repo conventions
 
-- Manifest: `articles/drafts/{slug}/manifest.yaml` — set `channels`, `canonical_url`
+- Link ingest: `node scripts/ingest-link.mjs <url>` → source material (POK-419); see `docs/link-ingestion.md`
+- Link-to-article: `scripts/prepare-link-draft.mjs` → `prompts/07-draft-from-link.md` (POK-421); see `docs/link-to-article.md`
+- Manifest: `articles/drafts/{slug}/manifest.yaml` — validate with `node scripts/validate-manifest.mjs {slug}`
 - Outlines: `articles/drafts/{slug}/outline.md` via `prompts/01-outline.md`
 - Drafts: `draft.md` → self-edit → `draft-v2.md` via `prompts/02-draft.md` and `prompts/03-self-edit.md`
 - Exports: `export/{channel}/{slug}.*` via `prompts/04-export-medium.md` through `prompts/06-export-x.md`

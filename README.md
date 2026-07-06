@@ -10,8 +10,10 @@ Local path: `~/Desktop/pokepitchshop/draftsmith`
 
 ## Workflow
 
-| Step | Prompt | Output |
-|------|--------|--------|
+| Step | Prompt / Script | Output |
+|------|-----------------|--------|
+| **Link → draft** | `scripts/prepare-link-draft.mjs` | `source-material.md` + `manifest.yaml` |
+| | `prompts/07-draft-from-link.md` | `articles/drafts/{slug}/draft.md` |
 | 0. Series plan | `prompts/00-series-plan.md` | `series/{series-slug}/manifest.yaml` |
 | 1. Outline | `prompts/01-outline.md` | `articles/drafts/{slug}/outline.md` |
 | 2. Draft | `prompts/02-draft.md` | `articles/drafts/{slug}/draft.md` |
@@ -39,6 +41,9 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `style/iostom-style-guide.md` | Technical article voice (POK-371) |
 | `docs/style-guide.md` | Style guide workflow and self-edit quick reference |
 | `docs/link-ingestion.md` | URL → source material router (POK-419) |
+| `docs/link-to-article.md` | Drop a link → draft workflow (POK-421) |
+| `docs/manifest-schema.md` | Manifest field reference (POK-420) |
+| `prompts/07-draft-from-link.md` | Draft from ingested source material |
 | `templates/source-material-template.md` | Ingested source material format |
 | `style/x-social-guide.md` | X thread/single tweet rules |
 | `docs/x-export.md` | X export workflow and validation |
@@ -77,6 +82,18 @@ node scripts/ingest-link.mjs <url> --out articles/drafts/{slug}/source-material.
 Python optional (YouTube + trafilatura fallback): `pip install -r scripts/requirements-ingest.txt`
 
 See [`docs/link-ingestion.md`](docs/link-ingestion.md).
+
+## Link-to-article (POK-421)
+
+Drop a link → draft in iostom's voice:
+
+```bash
+node scripts/prepare-link-draft.mjs https://github.com/gorilla/mux --slug go-gorilla-mux-url-params --angle "Show path variables with mux.Vars"
+```
+
+Then run `prompts/07-draft-from-link.md` in Cursor. Sample: `articles/drafts/go-gorilla-mux-url-params/`.
+
+See [`docs/link-to-article.md`](docs/link-to-article.md) and [`docs/manifest-schema.md`](docs/manifest-schema.md).
 
 ## X export (POK-379)
 
