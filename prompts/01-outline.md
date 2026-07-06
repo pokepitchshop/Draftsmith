@@ -28,16 +28,7 @@ Save the completed outline to:
 articles/drafts/{slug}/outline.md
 ```
 
-If the draft folder does not exist, create it and add a minimal `manifest.yaml`:
-
-```yaml
-slug: {slug}
-title: "{title}"
-channels: [medium]  # adjust per article
-destination: technical
-series: null        # or series slug
-status: draft
-```
+If the draft folder does not exist, create it and add a manifest from `templates/manifest-template.yaml`.
 
 ## Outline rules
 

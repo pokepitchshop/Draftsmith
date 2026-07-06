@@ -1,0 +1,16 @@
+# Per-article engagement metrics (POK-376)
+
+- slug: go-gorilla-mux-part-1
+  title: "What is Gorilla Mux? (Go HTTP Routing — Part 1)"
+  published_at: null
+  channels:
+    medium:
+      url: null
+      reads: null
+      claps: null
+    tommarler:
+      url: null
+    x:
+      format: null          # thread | single
+      url: null
+      impressions: null

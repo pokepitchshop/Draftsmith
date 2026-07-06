@@ -1,0 +1,13 @@
+slug: {slug}
+title: "{title}"
+channels:
+  - medium
+  # - tommarler
+  # - x
+canonical_url: null             # set after long-form publish
+series: null                    # or series slug
+status: draft                   # draft | review | exported | published
+published:
+  medium: null
+  tommarler: null
+  x: null
