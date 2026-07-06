@@ -7,7 +7,7 @@ Run on `draft.md` before exporting to any channel.
 Edit the draft for clarity, accuracy, and voice match. Read:
 
 1. **Draft:** `articles/drafts/{slug}/draft.md`
-2. **Style:** `style/iostom-style-guide.md`
+2. **Style:** `style/iostom-style-guide.md` — full voice reference; grammar checklist in § Grammar checklist
 3. **Manifest:** `articles/drafts/{slug}/manifest.yaml`
 4. **Series (if applicable):** `series/{series}/manifest.yaml` — verify continuity and sibling links
 
