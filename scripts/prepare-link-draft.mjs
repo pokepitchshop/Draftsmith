@@ -24,6 +24,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ingestLink } from "./lib/ingest-router.mjs";
 import { formatSourceMaterial } from "./lib/format-source-material.mjs";
+import { buildManifestYaml } from "./lib/manifest-schema.mjs";
 
 function parseArgs(argv) {
   const result = {
@@ -57,34 +58,6 @@ function parseArgs(argv) {
   return result;
 }
 
-function yamlQuote(value) {
-  return `"${String(value).replace(/"/g, '\\"')}"`;
-}
-
-function buildManifest({ slug, title, channels, sourceUrl, linkType, angle, series, part }) {
-  const channelLines = channels.map((c) => `  - ${c}`).join("\n");
-  const seriesLine = series ? series : "null";
-  const partLine = part ?? "null";
-  const angleLine = angle ? yamlQuote(angle) : "null";
-
-  return `slug: ${slug}
-title: ${yamlQuote(title)}
-source_url: ${sourceUrl}
-link_type: ${linkType}
-angle: ${angleLine}
-channels:
-${channelLines}
-canonical_url: null
-series: ${seriesLine}
-part: ${partLine}
-status: draft
-published:
-  medium: null
-  tommarler: null
-  x: null
-`;
-}
-
 const args = parseArgs(process.argv.slice(2));
 
 try {
@@ -103,7 +76,7 @@ try {
     engine: payload.engine,
   });
 
-  const manifest = buildManifest({
+  const manifest = buildManifestYaml({
     slug: args.slug,
     title,
     channels: args.channels,
