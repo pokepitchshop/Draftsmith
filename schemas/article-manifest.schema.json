@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pokepitchshop/Draftsmith/schemas/article-manifest.schema.json",
+  "title": "Draftsmith Article Manifest",
+  "description": "Per-article manifest for channel selection, link-to-article drafting, and publish tracking (POK-420).",
+  "type": "object",
+  "required": ["slug", "title", "channels", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Kebab-case folder name under articles/drafts/"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "Original dropped link (link-to-article drafts)"
+    },
+    "link_type": {
+      "type": ["string", "null"],
+      "enum": ["article", "docs", "blog", "github", "youtube", null],
+      "description": "Auto-filled by ingestion router"
+    },
+    "angle": {
+      "type": ["string", "null"],
+      "description": "Optional one-liner steering the draft"
+    },
+    "channels": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["medium", "tommarler", "x"]
+      }
+    },
+    "canonical_url": {
+      "type": ["string", "null"],
+      "format": "uri"
+    },
+    "series": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Series slug matching series/{slug}/manifest.yaml"
+    },
+    "part": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "exported", "published"]
+    },
+    "published": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "medium": { "type": ["string", "null"], "format": "uri" },
+        "tommarler": { "type": ["string", "null"], "format": "uri" },
+        "x": { "type": ["string", "null"], "format": "uri" }
+      }
+    }
+  },
+  "if": {
+    "properties": { "source_url": { "type": "string", "minLength": 1 } },
+    "required": ["source_url"]
+  },
+  "then": {
+    "required": ["link_type"]
+  }
+}

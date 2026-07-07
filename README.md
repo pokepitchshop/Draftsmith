@@ -42,7 +42,9 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `docs/style-guide.md` | Style guide workflow and self-edit quick reference |
 | `docs/link-ingestion.md` | URL → source material router (POK-419) |
 | `docs/link-to-article.md` | Drop a link → draft workflow (POK-421) |
-| `docs/manifest-schema.md` | Manifest field reference (POK-420) |
+| `docs/manifest-schema.md` | Manifest field reference + validation (POK-420) |
+| `schemas/article-manifest.schema.json` | JSON Schema for article manifests (POK-420) |
+| `scripts/lib/manifest-schema.mjs` | Manifest parse, validate, and build helpers |
 | `prompts/07-draft-from-link.md` | Draft from ingested source material |
 | `templates/source-material-template.md` | Ingested source material format |
 | `style/x-social-guide.md` | X thread/single tweet rules |
@@ -128,9 +130,10 @@ draftsmith/
 │   ├── tommarler/
 │   └── x/
 ├── series/                   # multi-part series manifests
+├── schemas/                  # article-manifest.schema.json (POK-420)
 ├── metrics/                  # per-channel engagement (POK-376)
 ├── references/               # source article links
-└── docs/                     # publish-checklist.md
+└── docs/                     # publish-checklist.md, manifest-schema.md, …
 ```
 
 Open this folder in Cursor — `AGENTS.md` loads automatically for every session.

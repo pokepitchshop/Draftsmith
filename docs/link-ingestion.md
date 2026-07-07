@@ -75,5 +75,6 @@ Given any supported link type, the router returns markdown with nav/boilerplate 
 ## Related
 
 - Linear: [POK-419](https://linear.app/pokepitchshop/issue/POK-419/build-link-ingestion-router-url-clean-markdown)
-- Blocks: POK-420 (manifest schema), POK-421 (link-to-article pipeline)
+- Manifest contract: [POK-420](https://linear.app/pokepitchshop/issue/POK-420/define-the-article-manifest-schema) — [`docs/manifest-schema.md`](manifest-schema.md)
+- Pipeline: [POK-421](https://linear.app/pokepitchshop/issue/POK-421/wire-drafting-prompt-into-pipeline-validate-against-a-real-link) — [`docs/link-to-article.md`](link-to-article.md)
 - Template: `templates/source-material-template.md`
