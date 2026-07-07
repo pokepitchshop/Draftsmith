@@ -1,6 +1,6 @@
 # Prompt: Draft article from a link
 
-Use for the **drop a link → article** workflow. Run after `scripts/prepare-link-draft.mjs` or manual ingestion.
+Use for the **drop a link → article** workflow. Run after `node scripts/draftsmith.mjs new <url>` (POK-426) or `scripts/prepare-link-draft.mjs`.
 
 Pairs with `AGENTS.md` (iostom persona) and the [Link-to-Article drafting prompt](https://linear.app/pokepitchshop/document/draftsmith-link-to-article-drafting-prompt-0eba2fbc21fd).
 

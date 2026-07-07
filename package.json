@@ -1,0 +1,16 @@
+{
+  "name": "draftsmith",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cursor-native AI writing system for iostom-style technical articles",
+  "type": "module",
+  "bin": {
+    "draftsmith": "./scripts/draftsmith.mjs"
+  },
+  "scripts": {
+    "drop-link": "node scripts/draftsmith.mjs new",
+    "validate-manifest": "node scripts/validate-manifest.mjs",
+    "test:manifest": "node scripts/test-manifest-schema.mjs",
+    "test:drop-link": "node scripts/test-drop-link.mjs"
+  }
+}

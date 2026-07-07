@@ -7,7 +7,7 @@ Ref: [Link-to-Article Drafting Prompt](https://linear.app/pokepitchshop/document
 ## Pipeline
 
 ```text
-prepare-link-draft.mjs   →  source-material.md + manifest.yaml
+draftsmith.mjs new <url>  →  manifest.yaml + source-material.md + handoff.md
         ↓
 07-draft-from-link       →  draft.md
         ↓
@@ -16,7 +16,18 @@ prepare-link-draft.mjs   →  source-material.md + manifest.yaml
 04–06 export             →  export/{channel}/...
 ```
 
-## Step 1 — Ingest and scaffold
+## Step 1 — Drop a link (recommended)
+
+```bash
+node scripts/draftsmith.mjs new https://github.com/gorilla/mux \
+  --slug go-gorilla-mux-url-params \
+  --channels medium,tommarler,x \
+  --angle "Show path variables with mux.Vars in a tiny Go API"
+```
+
+See [`docs/drop-link.md`](drop-link.md) for auto-slug and `--json` output.
+
+**Lower-level scaffold** (explicit slug only):
 
 ```bash
 node scripts/prepare-link-draft.mjs https://github.com/gorilla/mux \
@@ -30,7 +41,8 @@ Creates:
 ```
 articles/drafts/{slug}/
 ├── manifest.yaml        # source_url, link_type, channels, angle
-└── source-material.md   # router output
+├── source-material.md   # router output
+└── handoff.md           # ordered Cursor prompts (POK-426)
 ```
 
 Or ingest only:
@@ -92,6 +104,7 @@ Human review checklist:
 
 ## Related
 
+- [POK-426](https://linear.app/pokepitchshop/issue/POK-426/define-the-drop-a-link-input-interface-trigger) — drop-link CLI
 - [POK-419](https://linear.app/pokepitchshop/issue/POK-419/build-link-ingestion-router-url-clean-markdown) — link router
 - [POK-420](https://linear.app/pokepitchshop/issue/POK-420/define-the-article-manifest-schema) — manifest schema
 - [POK-421](https://linear.app/pokepitchshop/issue/POK-421/wire-drafting-prompt-into-pipeline-validate-against-a-real-link) — this workflow

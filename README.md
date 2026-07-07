@@ -12,8 +12,8 @@ Local path: `~/Desktop/pokepitchshop/draftsmith`
 
 | Step | Prompt / Script | Output |
 |------|-----------------|--------|
-| **Link → draft** | `scripts/prepare-link-draft.mjs` | `source-material.md` + `manifest.yaml` |
-| | `prompts/07-draft-from-link.md` | `articles/drafts/{slug}/draft.md` |
+| **Drop a link** | `node scripts/draftsmith.mjs new <url>` (POK-426) | `manifest.yaml` + `source-material.md` + `handoff.md` |
+| **Link → draft** | `prompts/07-draft-from-link.md` | `articles/drafts/{slug}/draft.md` |
 | 0. Series plan | `prompts/00-series-plan.md` | `series/{series-slug}/manifest.yaml` |
 | 1. Outline | `prompts/01-outline.md` | `articles/drafts/{slug}/outline.md` |
 | 2. Draft | `prompts/02-draft.md` | `articles/drafts/{slug}/draft.md` |
@@ -28,6 +28,16 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 
 ## Quick start
 
+**Drop a link (fastest path):**
+
+```bash
+node scripts/draftsmith.mjs new https://example.com/docs/guide \
+  --channels medium \
+  --angle "What I tried and what stuck"
+```
+
+Then paste the printed prompt into Cursor chat. See [`docs/drop-link.md`](docs/drop-link.md).
+
 1. Open this repo in Cursor (`AGENTS.md` loads automatically).
 2. Create or fill `articles/drafts/{slug}/manifest.yaml` (see `templates/manifest-template.yaml`).
 3. Run prompts in order through self-edit.
@@ -40,6 +50,8 @@ Publish steps: [`docs/publish-checklist.md`](docs/publish-checklist.md)
 | `AGENTS.md` | Persona and voice for Cursor |
 | `style/iostom-style-guide.md` | Technical article voice (POK-371) |
 | `docs/style-guide.md` | Style guide workflow and self-edit quick reference |
+| `docs/drop-link.md` | Drop-a-link CLI front door (POK-426) |
+| `scripts/draftsmith.mjs` | `new <url>` and `status <slug>` commands |
 | `docs/link-ingestion.md` | URL → source material router (POK-419) |
 | `docs/link-to-article.md` | Drop a link → draft workflow (POK-421) |
 | `docs/manifest-schema.md` | Manifest field reference + validation (POK-420) |

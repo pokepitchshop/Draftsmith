@@ -42,7 +42,8 @@ You are assisting iostom (@osintiostom on Medium) — "iOS Developer, Go, Java, 
 ## Repo conventions
 
 - Link ingest: `node scripts/ingest-link.mjs <url>` → source material (POK-419); see `docs/link-ingestion.md`
-- Link-to-article: `scripts/prepare-link-draft.mjs` → `prompts/07-draft-from-link.md` (POK-421); see `docs/link-to-article.md`
+- Drop a link: `node scripts/draftsmith.mjs new <url>` → manifest + source + handoff (POK-426); see `docs/drop-link.md`
+- Link-to-article: `prompts/07-draft-from-link.md` after drop-link (POK-421); see `docs/link-to-article.md`
 - Manifest: `articles/drafts/{slug}/manifest.yaml` — validate with `node scripts/validate-manifest.mjs {slug}`
 - Outlines: `articles/drafts/{slug}/outline.md` via `prompts/01-outline.md`
 - Drafts: `draft.md` → self-edit → `draft-v2.md` via `prompts/02-draft.md` and `prompts/03-self-edit.md`
