@@ -2,6 +2,8 @@
 
 Run after self-edit (`draft-v2.md`). Only export if `medium` is in manifest channels.
 
+> **Built in (POK-636):** `node scripts/draftsmith.mjs run {slug}` generates this export in code (`scripts/lib/export-markdown.mjs`), with no model and no chat step. Use this prompt only to export by hand.
+
 ## Instructions for the agent
 
 1. Read `articles/drafts/{slug}/draft-v2.md` (or `draft.md` if v2 doesn't exist)

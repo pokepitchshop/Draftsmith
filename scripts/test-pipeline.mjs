@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Tests for the pipeline step registry + runner (POK-634, POK-635).
+ * Tests for the pipeline step registry + runner (POK-634, POK-635, POK-636).
  * The ollama provider runs against a local mock /api/chat server.
  */
 
@@ -13,6 +13,7 @@ import { planSteps, resolvePipeline, runPipeline, splitOutputs, checkParagraphsP
 import { getPipelineStatus } from "./lib/link-draft.mjs";
 import { DEFAULT_CONFIG, normalizeHost, resolveStepSettings } from "./lib/config.mjs";
 import { cleanModelOutput } from "./lib/ollama.mjs";
+import { buildExportBody, parseFrontmatterReply } from "./lib/export-markdown.mjs";
 
 let failed = 0;
 
@@ -74,6 +75,55 @@ assert(
     await rejects(() => splitOutputs("<<<FILE: a.md>>>\nA\n", ["a.md", "b.md"])),
     "missing file section throws"
   );
+}
+
+// --- code exporter ----------------------------------------------------------
+
+{
+  const draft = [
+    "---",
+    "title: x",
+    "---",
+    "Intro.",
+    "",
+    "[Screenshot: terminal output]",
+    "",
+    "```markdown",
+    "---",
+    "[Screenshot: inside fence stays]",
+    "## Draft notes inside fence stays",
+    "```",
+    "",
+    "## Draft notes",
+    "",
+    "TODO internal",
+    "",
+    "### Sub-note",
+    "",
+    "still internal",
+    "",
+    "## Recap",
+    "",
+    "Done :)",
+    "",
+  ].join("\n");
+  const body = buildExportBody(draft);
+  assert(body.startsWith("Intro."), "exporter strips leading frontmatter");
+  assert(body.includes("<!-- image: terminal output -->"), "exporter converts screenshot markers");
+  assert(
+    body.includes("---\n[Screenshot: inside fence stays]\n## Draft notes inside fence stays"),
+    "exporter leaves code fences untouched"
+  );
+  assert(!body.includes("TODO internal") && !body.includes("still internal"), "exporter drops Draft notes section");
+  assert(body.endsWith("## Recap\n\nDone :)\n"), "exporter resumes after Draft notes");
+  assert(buildExportBody(body) === body, "exporter is idempotent");
+}
+
+{
+  const r = parseFrontmatterReply('{"description": "Build a thing.", "tags": ["Go", "gorilla mux", "go"]}');
+  assert(r.description === "Build a thing." && r.tags.join(",") === "go,gorilla-mux", "frontmatter tags normalized + deduped");
+  assert(await rejects(() => parseFrontmatterReply('{"description": "x", "tags": ["go"]}')), "frontmatter needs 2+ tags");
+  assert(await rejects(() => parseFrontmatterReply("no json here")), "frontmatter rejects non-JSON");
 }
 
 // --- export paragraph check -------------------------------------------------
@@ -146,10 +196,10 @@ const statusOf = (root, slug) =>
     assert(run.results[0].step === "export-medium", "draft-v2 without draft.md skips draft");
     assert(getPipelineStatus(slug, root).files.draft === false, "status still reports draft.md missing");
 
-    mkdirSync(join(root, "export", "medium"), { recursive: true });
-    writeFileSync(join(root, "export", "medium", `${slug}.md`), "medium");
-    run = await runPipeline(slug, { rootDir: root });
-    assert(run.results[0].blocked && /canonical_url/.test(run.results[0].reason), "export-x blocked without canonical_url");
+    assert(run.results[0].provider === "builtin" && !run.results[0].handoff, "agent: medium export runs in code");
+    assert(readFileSync(join(root, "export", "medium", `${slug}.md`), "utf8") === "# v2\n", "agent: medium export written");
+    assert(run.results[1].blocked && /canonical_url/.test(run.results[1].reason), "export-x blocked without canonical_url");
+    assert(statusOf(root, slug) === "exported", "agent: builtin step advances status");
 
     mkdirSync(join(root, "export", "x", slug), { recursive: true });
     writeFileSync(join(root, "export", "x", slug, "thread.md"), "thread");
@@ -247,6 +297,30 @@ try {
       write("scripts/validate-x-export.mjs", "console.error('tweet over 280'); process.exit(1);\n");
       run = await runPipeline(slug, { rootDir: root, provider: "ollama", config: ollamaConfig() });
       assert(/validation failed[\s\S]*tweet over 280/.test(run.results[0].error ?? ""), "validator failure reported");
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  }
+
+  {
+    const { root, slug, write } = makeRoot(["tommarler"]);
+    try {
+      write(`articles/drafts/${slug}/draft-v2.md`, "Intro.\n\n[Screenshot: shot]\n");
+
+      let run = await runPipeline(slug, { rootDir: root });
+      assert(run.results[0].step === "export-tommarler" && run.results[0].handoff, "agent: tommarler still hands off");
+
+      const before = requests.length;
+      reply = () => '{"description": "Learn the thing, step by step.", "tags": ["go", "HTTP"]}';
+      run = await runPipeline(slug, { rootDir: root, provider: "ollama", config: ollamaConfig() });
+      const out = readFileSync(join(root, "export", "tommarler", `${slug}.md`), "utf8");
+      const today = new Date().toLocaleDateString("en-CA");
+      assert(run.complete && run.results[0].provider === "builtin+ollama", "ollama: tommarler via builtin");
+      assert(
+        out === `---\ntitle: "Test"\ndescription: "Learn the thing, step by step."\npublishedAt: "${today}"\ntags: [go, http]\n---\n\nIntro.\n\n<!-- image: shot -->\n`,
+        "tommarler frontmatter from model + body from code"
+      );
+      assert(requests.length === before + 1 && requests.at(-1).format === "json", "tommarler asks model for JSON only");
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
