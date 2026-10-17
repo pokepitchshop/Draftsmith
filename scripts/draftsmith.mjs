@@ -5,7 +5,7 @@
  * Usage:
  *   node scripts/draftsmith.mjs new <url> [options]
  *   node scripts/draftsmith.mjs status <slug>
- *   node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>] [--json]
+ *   node scripts/draftsmith.mjs run <slug> [--provider agent|ollama] [--model <name>] [--until <step>] [--json]
  *
  * Options (new):
  *   --slug <slug>         kebab-case slug (auto-derived from URL if omitted)
@@ -134,24 +134,39 @@ function cmdStatus(slug) {
   }
 }
 
-function cmdRun(argv) {
-  const opts = { slug: null, provider: "agent", until: null, json: false };
+function printRunEvent(event) {
+  if (event.type === "start") {
+    process.stderr.write(`  ${event.step}: ${event.model} @ ${event.host} (~${event.promptTokens} prompt tokens)\n`);
+  } else if (event.type === "progress") {
+    // Live counter only on a terminal; piped/CI output gets just start + done.
+    if (process.stderr.isTTY) process.stderr.write(`\r    ${event.chars} chars`);
+  } else if (event.type === "done") {
+    const secs = event.stats.seconds ? `, ${event.stats.seconds.toFixed(0)}s` : "";
+    process.stderr.write(`${process.stderr.isTTY ? "\r" : ""}    done (${event.stats.outputTokens ?? "?"} tokens${secs})\n`);
+  }
+}
+
+async function cmdRun(argv) {
+  const opts = { slug: null, provider: null, model: null, until: null, json: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--provider") opts.provider = argv[++i];
+    else if (arg === "--model") opts.model = argv[++i];
     else if (arg === "--until") opts.until = argv[++i];
     else if (arg === "--json") opts.json = true;
     else if (!arg.startsWith("-") && !opts.slug) opts.slug = arg;
   }
 
   if (!opts.slug) {
-    console.error("Usage: node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>] [--json]");
+    console.error(
+      "Usage: node scripts/draftsmith.mjs run <slug> [--provider agent|ollama] [--model <name>] [--until <step>] [--json]"
+    );
     process.exit(1);
   }
 
   let result;
   try {
-    result = runPipeline(opts.slug, opts);
+    result = await runPipeline(opts.slug, { ...opts, onEvent: opts.json ? null : printRunEvent });
   } catch (error) {
     console.error(`FAIL: ${error.message}`);
     process.exit(1);
@@ -159,23 +174,28 @@ function cmdRun(argv) {
 
   if (opts.json) {
     console.log(JSON.stringify(result, null, 2));
-    return;
-  }
-
-  if (result.complete) {
-    console.log(`Pipeline complete: ${opts.slug}. Follow docs/publish-checklist.md to publish.`);
-    return;
-  }
-
-  if (result.results.length === 0) {
-    console.log(`Stopped before "${opts.until}" for ${opts.slug}.`);
+    if (result.results.some((r) => r.error)) process.exitCode = 1;
     return;
   }
 
   for (const r of result.results) {
     if (r.handoff) {
       console.log(`Next — Cursor chat:\n  ${r.message}\n\n  writes: ${r.output}`);
+    } else if (r.blocked) {
+      console.log(`Blocked at ${r.step}: ${r.reason}`);
+    } else if (r.error) {
+      console.error(`FAIL ${r.error}`);
+      process.exitCode = 1;
+    } else {
+      const status = r.status ? ` (status → ${r.status})` : "";
+      console.log(`Wrote ${r.written.join(", ")}${status}`);
     }
+  }
+
+  if (result.complete) {
+    console.log(`Pipeline complete: ${opts.slug}. Review the drafts, then follow docs/publish-checklist.md.`);
+  } else if (result.results.length === 0) {
+    console.log(`Stopped before "${opts.until}" for ${opts.slug}.`);
   }
 }
 
@@ -186,10 +206,10 @@ if (command === "new") {
 } else if (command === "status") {
   cmdStatus(rest[0]);
 } else if (command === "run") {
-  cmdRun(rest);
+  await cmdRun(rest);
 } else {
   console.error(`Usage: node scripts/draftsmith.mjs new <url> [options]`);
   console.error(`       node scripts/draftsmith.mjs status <slug>`);
-  console.error(`       node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>]`);
+  console.error(`       node scripts/draftsmith.mjs run <slug> [--provider agent|ollama] [--model <name>] [--until <step>]`);
   process.exit(1);
 }

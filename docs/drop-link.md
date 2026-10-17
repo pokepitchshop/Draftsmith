@@ -74,13 +74,13 @@ node scripts/draftsmith.mjs status <slug>
 
 Shows which files exist (`draft.md`, `draft-v2.md`, exports) and the next Cursor prompt.
 
-## Run the next step (POK-634)
+## Run the next step (POK-634, POK-635)
 
 ```bash
-node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>] [--json]
+node scripts/draftsmith.mjs run <slug> [--provider agent|ollama] [--model <name>] [--until <step>] [--json]
 ```
 
-Reads the step registry in `scripts/lib/pipeline.mjs`, skips steps whose output already exists, and hands off the next one. Phase 1 ships only the `agent` provider: it prints the Cursor prompt and stops. `--until self-edit` stops before that step (steps: `draft`, `self-edit`, `export-medium`, `export-tommarler`, `export-x`).
+Reads the step registry in `scripts/lib/pipeline.mjs` and skips steps whose output already exists. With the `agent` provider (default) it prints the next Cursor prompt and stops. With `ollama` it runs steps on a local model and writes the outputs. See [`docs/local-ollama.md`](local-ollama.md). `--until self-edit` stops before that step (steps: `draft`, `self-edit`, `export-medium`, `export-tommarler`, `export-x`).
 
 ## JSON output
 
