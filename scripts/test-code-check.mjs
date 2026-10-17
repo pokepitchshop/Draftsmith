@@ -8,7 +8,15 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { extractCodeBlocks, checkCodeBlocks, shellSource, goGetTargets, buildCheckReport } from "./lib/code-check.mjs";
+import {
+  extractCodeBlocks,
+  checkCodeBlocks,
+  shellSource,
+  goGetTargets,
+  buildCheckReport,
+  missingCompleteGo,
+  applyBlockFixes,
+} from "./lib/code-check.mjs";
 import { buildManifestYaml } from "./lib/manifest-schema.mjs";
 import { runPipeline } from "./lib/pipeline.mjs";
 
@@ -72,6 +80,23 @@ assert(
   assert(missing.results[0].status === "skip" && /not installed/.test(missing.results[0].detail), "missing tool → skip with warning, not pass");
 }
 
+assert(
+  missingCompleteGo([{ lang: "go", status: "skip" }, { lang: "bash", status: "pass" }]) &&
+    !missingCompleteGo([{ lang: "go", status: "skip" }, { lang: "go", status: "fail" }]) &&
+    !missingCompleteGo([{ lang: "bash", status: "pass" }]),
+  "missingCompleteGo: only when every go block is a fragment"
+);
+
+{
+  const md = `Intro\n\n${fence}go\nold one\n${fence}\n\nMiddle\n\n${fence}bash\nkeep\n${fence}\n\n${fence}go\nold\ntwo\n${fence}\nEnd`;
+  const blocks = extractCodeBlocks(md);
+  const fixed = applyBlockFixes(md, blocks, new Map([[blocks[0].line, "new\none"], [blocks[2].line, "new two"]]));
+  assert(
+    fixed === `Intro\n\n${fence}go\nnew\none\n${fence}\n\nMiddle\n\n${fence}bash\nkeep\n${fence}\n\n${fence}go\nnew two\n${fence}\nEnd`,
+    "applyBlockFixes: replaces only targeted bodies, line counts may change"
+  );
+}
+
 // --- go (real toolchain) ----------------------------------------------------
 
 if (hasGo) {
@@ -88,8 +113,37 @@ if (hasGo) {
   assert(s === "pass,fail,skip,pass,warn,fail", `go statuses (${s})`);
   assert(/undefined: undefinedThing/.test(results[1].detail), "go vet error surfaced");
   assert(/not an importable Go package/.test(results[4].detail), "go get of github.com/golang/go warned");
+
+  const imports = await checkCodeBlocks([
+    { lang: "go", line: 1, code: `package main\n\nimport "fmt"\n\nfunc main() {\n\tprintln(json.Valid(nil))\n}` },
+    { lang: "go", line: 2, code: `package main\n\nfunc main() {\n\tr := 1\n}` },
+  ]);
+  assert(imports.results[0].status === "pass" && /goimports fixed/.test(imports.results[0].detail), "goimports: unused + missing import fixed, compiles");
+  assert(/"encoding\/json"/.test(imports.results[0].fixedCode) && !/"fmt"/.test(imports.results[0].fixedCode), "goimports: fixedCode returned");
+  assert(imports.results[1].status === "fail" && /declared and not used/.test(imports.results[1].detail), "goimports can't fix logic errors");
 } else {
   console.log("SKIP go toolchain not installed; go cases not run");
+}
+
+// --- pipeline: goimports fix written back ------------------------------------
+
+if (hasGo) {
+  const root = mkdtempSync(join(tmpdir(), "draftsmith-check-"));
+  const slug = "fix";
+  const dir = join(root, "articles", "drafts", slug);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, "manifest.yaml"), buildManifestYaml({ slug, title: "Fix", channels: ["medium"], sourceUrl: "https://x.dev", linkType: "article" }));
+  writeFileSync(join(dir, "draft-v2.md"), `Intro.\n\n${fence}go\npackage main\n\nfunc main() {\n\tfmt.Println("hi")\n}\n${fence}\n\nOutro.\n`);
+  try {
+    const run = await runPipeline(slug, { rootDir: root });
+    const check = run.results[0];
+    assert(check.fixed === 1 && check.warnings === 0 && /goimports fixed 1 Go block/.test(check.summary), "pipeline: fix counted, not a warning");
+    const draft = readFileSync(join(dir, "draft-v2.md"), "utf8");
+    assert(draft.includes('import "fmt"') && draft.startsWith("Intro.") && draft.endsWith("Outro.\n"), "pipeline: fixed block written to draft-v2.md");
+    assert(readFileSync(join(root, "export", "medium", `${slug}.md`), "utf8").includes('import "fmt"'), "pipeline: export has fixed code");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 }
 
 // --- pipeline step ----------------------------------------------------------
@@ -127,7 +181,8 @@ if (hasGo) {
   try {
     const run = await runPipeline(slug, { rootDir: root, until: "export-medium" });
     const check = run.results[0];
-    assert(check.warnings === 1 && /nothing checkable/.test(check.summary), "only fragments → warning, not a clean pass");
+    assert(check.warnings === 2 && /nothing checkable/.test(check.summary), "only fragments → warning, not a clean pass");
+    assert(/no complete Go program/.test(check.summary), "go fragments only → no-complete-program warning");
     assert(/Nothing here could be checked automatically/.test(readFileSync(join(dir, "code-check.md"), "utf8")), "report says nothing was checkable");
   } finally {
     rmSync(root, { recursive: true, force: true });

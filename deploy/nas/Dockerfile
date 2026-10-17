@@ -15,6 +15,9 @@ COPY --from=golang:1.27.2-bookworm /usr/local/go /usr/local/go
 ENV PATH=/usr/local/go/bin:/opt/ingest/bin:$PATH \
     HOME=/work \
     GOTOOLCHAIN=local
+# Pre-install goimports so jobs don't fetch it (keep in sync with GOIMPORTS in scripts/lib/code-check.mjs).
+RUN HOME=/root GOBIN=/usr/local/bin go install golang.org/x/tools/cmd/goimports@v0.52.0 \
+  && HOME=/root go clean -modcache -cache
 
 WORKDIR /app
 COPY package.json ./

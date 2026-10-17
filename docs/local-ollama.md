@@ -97,7 +97,7 @@ The run continues step by step until it finishes, hits `--until`, hits an `agent
 - **Context:** Ollama silently truncates prompts over `num_ctx`. The runner estimates the prompt size and fails *before* sending if prompt + 4096 output tokens would exceed it. Draft steps on long sources are the usual culprit (Gorilla Mux URL params is ~10k). Raise `num_ctx` (more VRAM) or trim `source-material.md`.
 - **Preconditions:** `export-x` is blocked until `canonical_url` is set.
 - **Code check (POK-638):** after self-edit, the `check` step compiles or parses the code blocks in `draft-v2.md`, with no model involved. Nothing is executed.
-  - `go` files that start with `package` → `go vet` in a temp module. Fragments are skipped.
+  - `go` files that start with `package` → `goimports` (fixes missing/unused imports and formatting; the fixed block is written back into `draft-v2.md`), then `go vet` in a temp module. Fragments are skipped; a draft whose Go is *all* fragments gets a "no complete Go program" warning.
   - Shell → `bash -n`, and every `go get` target must resolve. A target that isn't an importable package (e.g. `github.com/golang/go`) is a warning.
   - `json` must parse; `xml` must be well-formed.
   - `java`, `properties`, `yaml`, `markdown` are skipped.
