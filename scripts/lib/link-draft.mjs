@@ -2,56 +2,26 @@
  * Link-to-article scaffold + pipeline handoff (POK-421 / POK-426).
  */
 
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { ingestLink } from "./ingest-router.mjs";
 import { formatSourceMaterial } from "./format-source-material.mjs";
 import { buildManifestYaml, parseManifest, validateManifest } from "./manifest-schema.mjs";
 import { slugFromUrl, isValidSlug } from "./slug-from-url.mjs";
-
-const EXPORT_PROMPTS = {
-  medium: "prompts/04-export-medium.md",
-  tommarler: "prompts/05-export-tommarler.md",
-  x: "prompts/06-export-x.md",
-};
-
-const EXPORT_PATHS = {
-  medium: (slug) => `export/medium/${slug}.md`,
-  tommarler: (slug) => `export/tommarler/${slug}.md`,
-  x: (slug) => `export/x/${slug}/thread.md`,
-};
+import { planSteps, agentMessage, resolvePipeline } from "./pipeline.mjs";
 
 export function buildCursorPrompts(slug, channels) {
-  const prompts = [
-    {
-      step: "draft",
-      file: "prompts/07-draft-from-link.md",
-      message: `Follow \`prompts/07-draft-from-link.md\` for slug \`${slug}\`.`,
-    },
-    {
-      step: "self-edit",
-      file: "prompts/03-self-edit.md",
-      message: `Follow \`prompts/03-self-edit.md\` for slug \`${slug}\`.`,
-    },
-  ];
-
-  for (const channel of channels) {
-    const promptFile = EXPORT_PROMPTS[channel];
-    if (promptFile) {
-      prompts.push({
-        step: `export-${channel}`,
-        file: promptFile,
-        message: `Follow \`${promptFile}\` for slug \`${slug}\`.`,
-      });
-    }
-  }
-
-  return prompts;
+  return planSteps(channels).map((step) => ({
+    step: step.id,
+    file: step.prompt,
+    message: agentMessage(step, slug),
+  }));
 }
 
 export function buildHandoffMarkdown({ slug, channels, cursorPrompts }) {
-  const exportLines = channels
-    .map((c) => `- \`${EXPORT_PATHS[c]?.(slug) ?? `export/${c}/${slug}`}\``)
+  const exportLines = planSteps(channels)
+    .filter((step) => step.channel)
+    .map((step) => `- \`${step.output(slug)}\``)
     .join("\n");
 
   const promptLines = cursorPrompts
@@ -165,48 +135,37 @@ export async function scaffoldLinkDraft({
 
 export function getPipelineStatus(slug, rootDir = process.cwd()) {
   const draftDir = join(rootDir, "articles", "drafts", slug);
-  const manifestPath = join(draftDir, "manifest.yaml");
+  const pipeline = resolvePipeline(slug, rootDir);
 
-  if (!existsSync(manifestPath)) {
+  if (!pipeline) {
     return { slug, exists: false, draftDir };
   }
 
-  const manifest = parseManifest(readFileSync(manifestPath, "utf8"));
-  const channels = manifest.channels ?? [];
+  const done = (id) => pipeline.steps.find((s) => s.step.id === id)?.done ?? false;
 
   const files = {
-    manifest: existsSync(manifestPath),
+    manifest: true,
     sourceMaterial: existsSync(join(draftDir, "source-material.md")),
     handoff: existsSync(join(draftDir, "handoff.md")),
     draft: existsSync(join(draftDir, "draft.md")),
-    draftV2: existsSync(join(draftDir, "draft-v2.md")),
+    draftV2: done("self-edit"),
   };
 
   const exports = {};
-  for (const channel of channels) {
-    const path = EXPORT_PATHS[channel]?.(slug);
-    exports[channel] = path ? existsSync(join(rootDir, path)) : false;
+  for (const channel of pipeline.manifest.channels ?? []) {
+    exports[channel] = pipeline.steps.some((s) => s.step.channel === channel && s.done);
   }
 
-  let nextStep = null;
-  if (!files.draft) {
-    nextStep = buildCursorPrompts(slug, channels)[0];
-  } else if (!files.draftV2) {
-    nextStep = buildCursorPrompts(slug, channels)[1];
-  } else {
-    const missingExport = channels.find((c) => !exports[c]);
-    if (missingExport) {
-      nextStep = buildCursorPrompts(slug, channels).find(
-        (p) => p.step === `export-${missingExport}`
-      );
-    }
-  }
+  const next = pipeline.next;
+  const nextStep = next
+    ? { step: next.id, file: next.prompt, message: agentMessage(next, slug) }
+    : null;
 
   return {
     slug,
     exists: true,
     draftDir,
-    manifest,
+    manifest: pipeline.manifest,
     files,
     exports,
     nextStep,

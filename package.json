@@ -9,8 +9,10 @@
   },
   "scripts": {
     "drop-link": "node scripts/draftsmith.mjs new",
+    "run": "node scripts/draftsmith.mjs run",
     "validate-manifest": "node scripts/validate-manifest.mjs",
     "test:manifest": "node scripts/test-manifest-schema.mjs",
-    "test:drop-link": "node scripts/test-drop-link.mjs"
+    "test:drop-link": "node scripts/test-drop-link.mjs",
+    "test:pipeline": "node scripts/test-pipeline.mjs"
   }
 }

@@ -5,6 +5,7 @@
  * Usage:
  *   node scripts/draftsmith.mjs new <url> [options]
  *   node scripts/draftsmith.mjs status <slug>
+ *   node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>] [--json]
  *
  * Options (new):
  *   --slug <slug>         kebab-case slug (auto-derived from URL if omitted)
@@ -23,6 +24,7 @@
  */
 
 import { scaffoldLinkDraft, getPipelineStatus } from "./lib/link-draft.mjs";
+import { runPipeline } from "./lib/pipeline.mjs";
 
 function parseNewArgs(argv) {
   const result = {
@@ -132,14 +134,62 @@ function cmdStatus(slug) {
   }
 }
 
+function cmdRun(argv) {
+  const opts = { slug: null, provider: "agent", until: null, json: false };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--provider") opts.provider = argv[++i];
+    else if (arg === "--until") opts.until = argv[++i];
+    else if (arg === "--json") opts.json = true;
+    else if (!arg.startsWith("-") && !opts.slug) opts.slug = arg;
+  }
+
+  if (!opts.slug) {
+    console.error("Usage: node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>] [--json]");
+    process.exit(1);
+  }
+
+  let result;
+  try {
+    result = runPipeline(opts.slug, opts);
+  } catch (error) {
+    console.error(`FAIL: ${error.message}`);
+    process.exit(1);
+  }
+
+  if (opts.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  if (result.complete) {
+    console.log(`Pipeline complete: ${opts.slug}. Follow docs/publish-checklist.md to publish.`);
+    return;
+  }
+
+  if (result.results.length === 0) {
+    console.log(`Stopped before "${opts.until}" for ${opts.slug}.`);
+    return;
+  }
+
+  for (const r of result.results) {
+    if (r.handoff) {
+      console.log(`Next — Cursor chat:\n  ${r.message}\n\n  writes: ${r.output}`);
+    }
+  }
+}
+
 const [command, ...rest] = process.argv.slice(2);
 
 if (command === "new") {
   await cmdNew(rest);
 } else if (command === "status") {
   cmdStatus(rest[0]);
+} else if (command === "run") {
+  cmdRun(rest);
 } else {
   console.error(`Usage: node scripts/draftsmith.mjs new <url> [options]`);
   console.error(`       node scripts/draftsmith.mjs status <slug>`);
+  console.error(`       node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>]`);
   process.exit(1);
 }
