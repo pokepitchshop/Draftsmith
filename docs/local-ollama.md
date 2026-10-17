@@ -96,6 +96,13 @@ The run continues step by step until it finishes, hits `--until`, hits an `agent
 
 - **Context:** Ollama silently truncates prompts over `num_ctx`. The runner estimates the prompt size and fails *before* sending if prompt + 4096 output tokens would exceed it. Draft steps on long sources are the usual culprit (Gorilla Mux URL params is ~10k). Raise `num_ctx` (more VRAM) or trim `source-material.md`.
 - **Preconditions:** `export-x` is blocked until `canonical_url` is set.
+- **Code check (POK-638):** after self-edit, the `check` step compiles or parses the code blocks in `draft-v2.md`, with no model involved. Nothing is executed.
+  - `go` files that start with `package` → `go vet` in a temp module. Fragments are skipped.
+  - Shell → `bash -n`, and every `go get` target must resolve. A target that isn't an importable package (e.g. `github.com/golang/go`) is a warning.
+  - `json` must parse; `xml` must be well-formed.
+  - `java`, `properties`, `yaml`, `markdown` are skipped.
+
+  Pass writes `code-check.md`. Fail writes `code-check-failed.md` and stops before exports; fix `draft-v2.md` and re-run. A draft whose code blocks are all fragments gets a "nothing checkable" warning instead of a clean pass.
 - **Exports in code (POK-636):** `export-medium` is built in code from `draft-v2.md` for every provider (screenshot markers → `<!-- image -->`, `Draft notes` removed, code fences untouched). `export-tommarler` builds its body the same way; with `ollama` the model only writes the frontmatter `description` + `tags` as JSON.
 - **Export check:** `export-medium` and `export-tommarler` must carry every paragraph of `draft-v2.md` over unchanged. Screenshot markers, `Draft notes`, and bare URLs that become links don't count as changes. Small models sometimes drop the opening paragraph; this catches it.
 - **Validators:** `export-x` runs `validate-x-export.mjs`.

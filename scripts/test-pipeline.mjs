@@ -39,12 +39,12 @@ const ids = (steps) => steps.map((s) => s.id).join(",");
 
 // --- registry ---------------------------------------------------------------
 
-assert(ids(planSteps(["medium"])) === "draft,self-edit,export-medium", "plan for medium");
+assert(ids(planSteps(["medium"])) === "draft,self-edit,check,export-medium", "plan for medium");
 assert(
-  ids(planSteps(["x", "medium"])) === "draft,self-edit,export-x,export-medium",
+  ids(planSteps(["x", "medium"])) === "draft,self-edit,check,export-x,export-medium",
   "exports follow manifest channel order"
 );
-assert(ids(planSteps(["bogus"])) === "draft,self-edit", "unknown channel ignored");
+assert(ids(planSteps(["bogus"])) === "draft,self-edit,check", "unknown channel ignored");
 
 // --- config -----------------------------------------------------------------
 
@@ -155,7 +155,7 @@ function makeRoot(channels) {
     buildManifestYaml({ slug, title: "Test", channels, sourceUrl: "https://example.com", linkType: "article" })
   );
   write(`articles/drafts/${slug}/source-material.md`, "# Source\n");
-  for (const step of STEPS) write(step.prompt, `Prompt ${step.id} for {slug}\n`);
+  for (const step of STEPS) if (step.prompt) write(step.prompt, `Prompt ${step.id} for {slug}\n`);
   for (const file of [
     "style/iostom-style-guide.md",
     "style/x-social-guide.md",
@@ -193,12 +193,13 @@ const statusOf = (root, slug) =>
     rmSync(join(draftDir, "draft.md"));
     writeFileSync(join(draftDir, "draft-v2.md"), "# v2");
     run = await runPipeline(slug, { rootDir: root });
-    assert(run.results[0].step === "export-medium", "draft-v2 without draft.md skips draft");
+    assert(run.results.map((r) => r.step).join() === "check,export-medium,export-x", "draft-v2 without draft.md skips draft");
+    assert(run.results[0].provider === "builtin" && /0 failed/.test(run.results[0].summary), "agent: code check runs in code");
     assert(getPipelineStatus(slug, root).files.draft === false, "status still reports draft.md missing");
 
-    assert(run.results[0].provider === "builtin" && !run.results[0].handoff, "agent: medium export runs in code");
+    assert(run.results[1].provider === "builtin" && !run.results[1].handoff, "agent: medium export runs in code");
     assert(readFileSync(join(root, "export", "medium", `${slug}.md`), "utf8") === "# v2\n", "agent: medium export written");
-    assert(run.results[1].blocked && /canonical_url/.test(run.results[1].reason), "export-x blocked without canonical_url");
+    assert(run.results[2].blocked && /canonical_url/.test(run.results[2].reason), "export-x blocked without canonical_url");
     assert(statusOf(root, slug) === "exported", "agent: builtin step advances status");
 
     mkdirSync(join(root, "export", "x", slug), { recursive: true });
@@ -257,7 +258,7 @@ try {
       });
 
       assert(run.complete, "ollama runs every step to completion");
-      assert(ids(run.results.map((r) => ({ id: r.step }))) === "draft,self-edit,export-medium", "ollama step order");
+      assert(ids(run.results.map((r) => ({ id: r.step }))) === "draft,self-edit,check,export-medium", "ollama step order");
       assert(readFileSync(join(draftDir, "draft.md"), "utf8") === "# Draft body\n", "draft.md written, <think> stripped");
       assert(existsSync(join(draftDir, "draft-v2.md")), "draft-v2.md written");
       assert(existsSync(join(root, "export", "medium", `${slug}.md`)), "medium export written");
@@ -308,7 +309,8 @@ try {
       write(`articles/drafts/${slug}/draft-v2.md`, "Intro.\n\n[Screenshot: shot]\n");
 
       let run = await runPipeline(slug, { rootDir: root });
-      assert(run.results[0].step === "export-tommarler" && run.results[0].handoff, "agent: tommarler still hands off");
+      const tm = run.results.find((r) => r.step === "export-tommarler");
+      assert(run.results[0].step === "check" && tm?.handoff, "agent: tommarler still hands off");
 
       const before = requests.length;
       reply = () => '{"description": "Learn the thing, step by step.", "tags": ["go", "HTTP"]}';

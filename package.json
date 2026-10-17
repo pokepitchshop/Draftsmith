@@ -15,6 +15,7 @@
     "test:drop-link": "node scripts/test-drop-link.mjs",
     "test:pipeline": "node scripts/test-pipeline.mjs",
     "worker": "node scripts/worker.mjs",
-    "test:worker": "node scripts/test-worker.mjs"
+    "test:worker": "node scripts/test-worker.mjs",
+    "test:code-check": "node scripts/test-code-check.mjs"
   }
 }

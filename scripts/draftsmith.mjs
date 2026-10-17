@@ -188,7 +188,8 @@ async function cmdRun(argv) {
       process.exitCode = 1;
     } else {
       const status = r.status ? ` (status → ${r.status})` : "";
-      console.log(`Wrote ${r.written.join(", ")}${status}`);
+      const summary = r.summary ? ` — ${r.summary}` : "";
+      console.log(`Wrote ${r.written.join(", ")}${summary}${status}`);
     }
   }
 

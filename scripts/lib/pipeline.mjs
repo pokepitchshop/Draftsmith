@@ -10,13 +10,14 @@
  * null to fall through to the provider.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { spawnSync } from "node:child_process";
 import { parseManifest, VALID_STATUSES } from "./manifest-schema.mjs";
 import { loadConfig, resolveStepSettings } from "./config.mjs";
 import { ollamaChat, estimateTokens, cleanModelOutput } from "./ollama.mjs";
 import { buildExportBody, buildTommarlerExport, parseFrontmatterReply } from "./export-markdown.mjs";
+import { extractCodeBlocks, checkCodeBlocks, buildCheckReport } from "./code-check.mjs";
 
 const draftPath = (slug, file) => `articles/drafts/${slug}/${file}`;
 
@@ -90,6 +91,18 @@ export const STEPS = [
       ...(manifest.series ? [`series/${manifest.series}/manifest.yaml`] : []),
     ],
     output: (slug) => draftPath(slug, "draft-v2.md"),
+    setsStatus: "review",
+  },
+  {
+    id: "check",
+    prompt: null,
+    inputs: (slug) => [draftPath(slug, "draft-v2.md")],
+    output: (slug) => draftPath(slug, "code-check.md"),
+    // Articles exported before this step existed count as checked.
+    alsoDoneWhen: (slug) => [`export/medium/${slug}.md`, `export/tommarler/${slug}.md`, `export/x/${slug}/thread.md`],
+    // Compile/parse code samples in code (no model) for every provider.
+    builtin: (ctx) => codeCheckBuiltin(ctx),
+    agentMessage: (slug) => `Run \`node scripts/draftsmith.mjs run ${slug}\` — the code check is built in.`,
     setsStatus: "review",
   },
   {
@@ -298,6 +311,37 @@ function writeOutput(rootDir, path, content) {
 
 function readDraftBody(slug, rootDir) {
   return buildExportBody(readFileSync(join(rootDir, draftPath(slug, "draft-v2.md")), "utf8"));
+}
+
+/**
+ * Pass → code-check.md (step done). Fail → code-check-failed.md + error, so
+ * the next run re-checks automatically once draft-v2.md is fixed.
+ */
+async function codeCheckBuiltin({ step, slug, rootDir, onEvent }) {
+  const blocks = extractCodeBlocks(readFileSync(join(rootDir, draftPath(slug, "draft-v2.md")), "utf8"));
+  onEvent?.({ type: "check", step: step.id, blocks: blocks.length });
+  const outcome = await checkCodeBlocks(blocks);
+  const report = buildCheckReport(slug, outcome);
+  const failedPath = draftPath(slug, "code-check-failed.md");
+  const { pass, warn, fail, skip } = outcome.counts;
+  // Code blocks present but none checkable (all fragments / unsupported) must not read as a clean pass.
+  const nothingChecked = skip > 0 && pass + warn + fail === 0;
+  const summary =
+    `${pass} passed, ${warn} warnings, ${fail} failed, ${skip} skipped` +
+    (nothingChecked ? " — nothing checkable, review code by hand" : "");
+
+  if (fail) {
+    writeOutput(rootDir, failedPath, report);
+    const first = outcome.results.find((r) => r.status === "fail");
+    throw new Error(
+      `${step.id}: ${summary}. First failure: block ${first.index} (line ${first.line}, ${first.lang}): ` +
+        `${first.detail.split("\n").slice(0, 3).join(" ")}\nFull report: ${failedPath}. Fix draft-v2.md and re-run.`
+    );
+  }
+
+  rmSync(join(rootDir, failedPath), { force: true });
+  writeOutput(rootDir, step.output(slug), report);
+  return { handoff: false, provider: "builtin", written: [step.output(slug)], summary, warnings: warn + (nothingChecked ? 1 : 0) };
 }
 
 async function exportMediumBuiltin({ step, slug, rootDir }) {
