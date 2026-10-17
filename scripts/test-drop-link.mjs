@@ -29,9 +29,9 @@ assert(
 assert(isValidSlug(slugFromUrl("https://cursor.com/docs/rules")), "cursor docs slug valid");
 
 const prompts = buildCursorPrompts("my-slug", ["medium", "x"]);
-assert(prompts.length === 4, "prompts for medium + x");
+assert(prompts.length === 5, "prompts for medium + x (incl. built-in check)");
 assert(prompts[0].message.includes("07-draft-from-link"), "draft prompt present");
-assert(prompts.some((p) => p.file.includes("04-export-medium")), "medium export prompt");
+assert(prompts.some((p) => p.file?.includes("04-export-medium")), "medium export prompt");
 
 assert(
   jinaTitle("Title: Routing Enhancements for Go 1.22 - The Go Programming Language\n\nURL Source: x") ===

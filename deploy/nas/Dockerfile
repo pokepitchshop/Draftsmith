@@ -9,8 +9,12 @@ RUN apt-get update \
 COPY scripts/requirements-ingest.txt /tmp/requirements-ingest.txt
 RUN python3 -m venv /opt/ingest \
   && /opt/ingest/bin/pip install --no-cache-dir -r /tmp/requirements-ingest.txt
-ENV PATH=/opt/ingest/bin:$PATH \
-    HOME=/work
+# Go toolchain for the code-check step (POK-638). Debian's golang is too old for
+# Go 1.22+ samples. Module + build caches live under HOME (/work), so they persist.
+COPY --from=golang:1.27.2-bookworm /usr/local/go /usr/local/go
+ENV PATH=/usr/local/go/bin:/opt/ingest/bin:$PATH \
+    HOME=/work \
+    GOTOOLCHAIN=local
 
 WORKDIR /app
 COPY package.json ./

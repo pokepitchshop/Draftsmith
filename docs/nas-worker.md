@@ -15,7 +15,7 @@ inbox/go-routing.txt
   sync GitHub main → Gitea main (fast-forward or merge, never force)
   work/repo: reset to Gitea main
   draftsmith new <url> …        (ingest → manifest + source-material)
-  draftsmith run --provider ollama   (draft → self-edit → exports)
+  draftsmith run --provider ollama   (draft → self-edit → code check → exports)
   commit on draft/<slug> → push to Gitea → open Gitea PR
         ↓
   inbox/done/go-routing.txt(.log)   ← PR URL in the log
@@ -23,6 +23,7 @@ inbox/go-routing.txt
 ```
 
 - If a step fails (e.g. an export check), the work is still pushed and the PR opens with a `WIP:` title, with the error in the PR body.
+- If code samples fail the code check, exports are skipped and the PR opens as `WIP:` with `code-check-failed.md`. Warnings (e.g. a suspicious `go get`, or nothing checkable) show as ⚠️ in the PR's step table.
 - If the slug already exists on `main`, the job fails. Add a `slug:` line to pick another.
 - If `draft/<slug>` already exists in Gitea, the branch gets a timestamp suffix.
 - If GitHub main and Gitea main changed the same file differently, the job fails and Gitea main is left untouched; resolve by hand.
@@ -101,4 +102,4 @@ The inbox is `/volume1/docker/draftsmith/inbox/`, inside the `docker` shared fol
 
 ## Quality
 
-The 2070 runs a 7B model. Every PR is a first draft: check commands, APIs, and versions before publishing. The PR body includes a review checklist.
+The 2070 runs a 7B model. Every PR is a first draft: check commands, APIs, and versions before publishing. The PR body includes a review checklist. The code check catches code that doesn't compile and bad `go get` paths, but not code that compiles and is still wrong, Java samples, or fragments.
