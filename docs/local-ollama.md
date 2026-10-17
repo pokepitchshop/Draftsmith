@@ -46,7 +46,7 @@ Home Assistant keeps `qwen2.5:7b` loaded with `num_ctx` 8192 and `keep_alive: -1
 
 | Model | Notes |
 |-------|-------|
-| `qwen2.5:7b` | Current config, shared with Home Assistant on the Windows box (192.168.1.12). ~5 GB VRAM. Medium export in ~15–20s, but dropped prose in 2 of 2 test runs (caught by the export check). |
+| `qwen2.5:7b` | Current config, shared with Home Assistant and sdvosb-app on the Windows box (192.168.1.12). ~5 GB VRAM. Dropped prose in 2 of 2 full Medium-export runs, which is why exports are now built in code. |
 | `llama3.1:8b` | Medium export passed the export check (tested on an M4 Pro, ~30s). |
 | `qwen3:8b` | Untested here; strong instruction following on paper. |
 | 12B+ | Spills to CPU at 16k context; expect it to be much slower. |
@@ -96,6 +96,7 @@ The run continues step by step until it finishes, hits `--until`, hits an `agent
 
 - **Context:** Ollama silently truncates prompts over `num_ctx`. The runner estimates the prompt size and fails *before* sending if prompt + 4096 output tokens would exceed it. Draft steps on long sources are the usual culprit (Gorilla Mux URL params is ~10k). Raise `num_ctx` (more VRAM) or trim `source-material.md`.
 - **Preconditions:** `export-x` is blocked until `canonical_url` is set.
+- **Exports in code (POK-636):** `export-medium` is built in code from `draft-v2.md` for every provider (screenshot markers → `<!-- image -->`, `Draft notes` removed, code fences untouched). `export-tommarler` builds its body the same way; with `ollama` the model only writes the frontmatter `description` + `tags` as JSON.
 - **Export check:** `export-medium` and `export-tommarler` must carry every paragraph of `draft-v2.md` over unchanged. Screenshot markers, `Draft notes`, and bare URLs that become links don't count as changes. Small models sometimes drop the opening paragraph; this catches it.
 - **Validators:** `export-x` runs `validate-x-export.mjs`.
 - A failed check or validator stops the run, leaves the output on disk, and does not advance the status. Fix the file, or delete it and re-run.

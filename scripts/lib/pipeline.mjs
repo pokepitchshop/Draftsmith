@@ -6,6 +6,8 @@
  * runs:
  *   - agent:  hand the prompt to a chat agent (Cursor, etc.) and stop
  *   - ollama: assemble prompt + inputs, call a local Ollama server, write outputs
+ * Steps with a `builtin` run in code instead (POK-636); a builtin may return
+ * null to fall through to the provider.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -14,6 +16,7 @@ import { spawnSync } from "node:child_process";
 import { parseManifest, VALID_STATUSES } from "./manifest-schema.mjs";
 import { loadConfig, resolveStepSettings } from "./config.mjs";
 import { ollamaChat, estimateTokens, cleanModelOutput } from "./ollama.mjs";
+import { buildExportBody, buildTommarlerExport, parseFrontmatterReply } from "./export-markdown.mjs";
 
 const draftPath = (slug, file) => `articles/drafts/${slug}/${file}`;
 
@@ -99,6 +102,9 @@ export const STEPS = [
       "templates/export-medium.md",
     ],
     output: (slug) => `export/medium/${slug}.md`,
+    // Mechanical transform of draft-v2.md: no model, no handoff, any provider.
+    builtin: (ctx) => exportMediumBuiltin(ctx),
+    agentMessage: (slug) => `Run \`node scripts/draftsmith.mjs run ${slug}\` — the Medium export is built in code.`,
     check: (slug, rootDir) => preservesDraft(slug, rootDir, `export/medium/${slug}.md`),
     setsStatus: "exported",
   },
@@ -112,6 +118,8 @@ export const STEPS = [
       "templates/export-tommarler.md",
     ],
     output: (slug) => `export/tommarler/${slug}.md`,
+    // Body in code; with ollama the model only writes description + tags. Agent hands off as before.
+    builtin: (ctx) => (ctx.settings.provider === "ollama" ? exportTommarlerBuiltin(ctx) : null),
     check: (slug, rootDir) => preservesDraft(slug, rootDir, `export/tommarler/${slug}.md`),
     setsStatus: "exported",
   },
@@ -151,7 +159,7 @@ export function planSteps(channels = []) {
 }
 
 export function agentMessage(step, slug) {
-  return `Follow \`${step.prompt}\` for slug \`${slug}\`.`;
+  return step.agentMessage?.(slug) ?? `Follow \`${step.prompt}\` for slug \`${slug}\`.`;
 }
 
 export function stepOutputs(step, slug) {
@@ -256,6 +264,77 @@ export function splitOutputs(text, expected) {
   return parts;
 }
 
+/**
+ * Call Ollama after checking the prompt fits num_ctx (Ollama truncates silently).
+ */
+async function guardedChat(step, messages, settings, onEvent, { format = null } = {}) {
+  const { host, model, num_ctx, temperature } = settings.ollama;
+  const promptTokens = estimateTokens(messages.map((m) => m.content).join("\n"));
+  if (promptTokens + OUTPUT_TOKEN_RESERVE > num_ctx) {
+    throw new Error(
+      `${step.id}: prompt is ~${promptTokens} tokens + ${OUTPUT_TOKEN_RESERVE} reserved for output, over num_ctx ${num_ctx}. ` +
+        `Raise ollama.num_ctx in draftsmith.config.json (uses more VRAM) or trim the inputs.`
+    );
+  }
+
+  onEvent?.({ type: "start", step: step.id, model, host, promptTokens });
+  const reply = await ollamaChat({
+    host,
+    model,
+    messages,
+    format,
+    options: { num_ctx, temperature },
+    onProgress: (chars) => onEvent?.({ type: "progress", step: step.id, chars }),
+  });
+  onEvent?.({ type: "done", step: step.id, stats: reply.stats });
+  return reply;
+}
+
+function writeOutput(rootDir, path, content) {
+  const full = join(rootDir, path);
+  mkdirSync(dirname(full), { recursive: true });
+  writeFileSync(full, content, "utf8");
+}
+
+function readDraftBody(slug, rootDir) {
+  return buildExportBody(readFileSync(join(rootDir, draftPath(slug, "draft-v2.md")), "utf8"));
+}
+
+async function exportMediumBuiltin({ step, slug, rootDir }) {
+  writeOutput(rootDir, step.output(slug), readDraftBody(slug, rootDir));
+  return { handoff: false, provider: "builtin", written: [step.output(slug)] };
+}
+
+async function exportTommarlerBuiltin({ step, slug, rootDir, manifest, settings, onEvent }) {
+  const body = readDraftBody(slug, rootDir);
+  const messages = [
+    {
+      role: "system",
+      content: `You write frontmatter for a tommarler.com blog post. Reply with only a JSON object: {"description": "...", "tags": ["..."]}.
+- description: 1–2 plain-text sentences for the SEO meta description, under 160 characters, saying what the reader builds or learns.
+- tags: 2–6 lowercase topic tags, kebab-case (example: ["go", "gorilla-mux", "http", "tutorials"]).`,
+    },
+    { role: "user", content: `Title: ${manifest.title}\n\n<article>\n${body}</article>` },
+  ];
+
+  const { content, stats } = await guardedChat(step, messages, settings, onEvent, { format: "json" });
+  const { description, tags } = parseFrontmatterReply(content);
+  if (description.length > 300) throw new Error(`${step.id}: description is ${description.length} chars (max 300)`);
+
+  writeOutput(
+    rootDir,
+    step.output(slug),
+    buildTommarlerExport({
+      title: manifest.title,
+      description,
+      tags,
+      publishedAt: new Date().toLocaleDateString("en-CA"),
+      body,
+    })
+  );
+  return { handoff: false, provider: "builtin+ollama", written: [step.output(slug)], stats };
+}
+
 export const PROVIDERS = {
   /**
    * Hand the step to a chat agent (Cursor, etc.) and stop. The agent reads
@@ -274,37 +353,17 @@ export const PROVIDERS = {
   ollama: {
     stopsAfterHandoff: false,
     async run(step, slug, { rootDir, manifest, settings, onEvent }) {
-      const { host, model, num_ctx, temperature } = settings.ollama;
       const messages = buildStepMessages(step, slug, manifest, rootDir);
-
-      const promptTokens = estimateTokens(messages.map((m) => m.content).join("\n"));
-      if (promptTokens + OUTPUT_TOKEN_RESERVE > num_ctx) {
-        throw new Error(
-          `${step.id}: prompt is ~${promptTokens} tokens + ${OUTPUT_TOKEN_RESERVE} reserved for output, over num_ctx ${num_ctx}. ` +
-            `Raise ollama.num_ctx in draftsmith.config.json (uses more VRAM) or trim the inputs.`
-        );
-      }
-
-      onEvent?.({ type: "start", step: step.id, model, host, promptTokens });
-      const { content, stats } = await ollamaChat({
-        host,
-        model,
-        messages,
-        options: { num_ctx, temperature },
-        onProgress: (chars) => onEvent?.({ type: "progress", step: step.id, chars }),
-      });
+      const { content, stats } = await guardedChat(step, messages, settings, onEvent);
 
       const outputs = stepOutputs(step, slug);
       const parts = splitOutputs(content, outputs);
       for (const path of outputs) {
         const body = cleanModelOutput(parts[path]);
         if (!body.trim()) throw new Error(`${step.id}: model returned empty content for ${path}`);
-        const full = join(rootDir, path);
-        mkdirSync(dirname(full), { recursive: true });
-        writeFileSync(full, body, "utf8");
+        writeOutput(rootDir, path, body);
       }
 
-      onEvent?.({ type: "done", step: step.id, stats });
       return { handoff: false, written: outputs, stats };
     },
   },
@@ -379,7 +438,8 @@ export async function runPipeline(
 
     let result;
     try {
-      result = await impl.run(step, slug, { rootDir, manifest, settings, onEvent });
+      const ctx = { step, slug, rootDir, manifest, settings, onEvent };
+      result = (await step.builtin?.(ctx)) ?? (await impl.run(step, slug, ctx));
     } catch (error) {
       results.push({ ...base, error: error.message });
       break;

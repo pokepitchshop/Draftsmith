@@ -34,9 +34,10 @@ export function cleanModelOutput(text) {
  * @param {string} opts.model      e.g. qwen3:8b
  * @param {Array}  opts.messages   [{ role, content }]
  * @param {object} [opts.options]  Ollama options (num_ctx, temperature, ...)
+ * @param {string} [opts.format]   "json" to constrain the reply to valid JSON
  * @param {(chars: number) => void} [opts.onProgress]
  */
-export async function ollamaChat({ host, model, messages, options = {}, onProgress = null }) {
+export async function ollamaChat({ host, model, messages, options = {}, format = null, onProgress = null }) {
   const url = new URL("/api/chat", host);
 
   let response;
@@ -44,7 +45,7 @@ export async function ollamaChat({ host, model, messages, options = {}, onProgre
     response = await fetch(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model, messages, stream: true, options }),
+      body: JSON.stringify({ model, messages, stream: true, options, ...(format ? { format } : {}) }),
     });
   } catch (error) {
     throw new Error(`ollama: cannot reach ${host} (${error.cause?.code ?? error.message})`);
