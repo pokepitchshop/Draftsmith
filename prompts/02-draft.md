@@ -31,6 +31,7 @@ articles/drafts/{slug}/draft.md
 - Expand every outline section into prose — first-person, conversational.
 - Use `##` headings matching the outline's question-style titles.
 - Include real fenced code blocks and CLI commands from the outline.
+- Show the complete file at least once: after the step-by-step snippets, one fenced block with the whole program the reader ends up with (Go: full `main.go` with `package main` and imports). Never only fragments.
 - Keep `[Screenshot: ...]` placeholders where the outline specifies them.
 - For series Part 1: use the series `payoff_line` in the opening.
 - For series Part 2+: open with a callback to the prior part per `templates/series-part-bridge-template.md`.
@@ -41,6 +42,7 @@ articles/drafts/{slug}/draft.md
 ## Acceptance check
 
 - [ ] Every outline section is expanded with runnable code/CLI
+- [ ] The complete program appears at least once in one block
 - [ ] Voice matches `style/iostom-style-guide.md`
 - [ ] Screenshot placeholders remain for visual steps
 - [ ] Sign-off ritual present (recap, teaser, comments invite, links)

@@ -150,6 +150,7 @@ Raise quality without losing iostom's conversational voice:
 2. **End with a working result** — curl output, running server, `pyenv version`, parsed HTML — something verifiable.
 3. **Short paragraphs** — break run-on sentences (common in early drafts).
 4. **Real code blocks** — never screenshot code that should be copy-pasteable.
+   Show the **complete file** at least once (e.g. the full `main.go`), not only fragments, so readers can copy it and run it.
 5. **Link a demo repo** when the article builds something over multiple steps.
 6. **Flag unverified output** — don't fabricate command results.
 

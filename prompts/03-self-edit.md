@@ -45,6 +45,8 @@ Update manifest: `status: review`
 ### Technical
 
 - [ ] Code blocks are runnable; commands match current tool versions
+- [ ] The complete program appears at least once as one copy-paste block (Go: `package main` + imports + `func main`). If the draft only has fragments, add the full file after the step-by-step section, assembled from those fragments.
+- [ ] `go get` / install commands name the package the code imports (e.g. `github.com/gorilla/mux`), not a toolchain or unrelated repo
 - [ ] No fabricated output — flag anything unverified
 - [ ] Screenshot placeholders follow steps with visible results
 

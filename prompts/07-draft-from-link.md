@@ -50,6 +50,7 @@ Use `manifest.angle` when set — it steers what you build/teach from the source
 2. **Opening** — context + real-world motivation; "what you'll learn" line.
 3. **Question-style `##` headings** — "What is X?", "How do you Y?"
 4. **Step-by-step** — runnable CLI/code with expected results.
+   - **Show the complete file at least once.** After the step-by-step snippets, include the whole program the reader ends up with as one fenced block they can copy and run: for Go, the full `main.go` starting with `package main` and its `import` block. Fragments are fine for explaining one change at a time, but never only fragments. The pipeline compiles this block (`check` step).
 5. **`[Screenshot: ...]`** placeholders after steps with visible output.
 6. **Recap** + series teaser (if `series` set) + comment invite + related links (include source URL).
 7. **Length** — short, focused (~2–6 min read). Skimmable.
@@ -66,6 +67,7 @@ Before saving, verify:
 - [ ] Voice matches `style/iostom-style-guide.md` (first-person, warm, practical)
 - [ ] Source used for facts/ideas, not copied prose or structure
 - [ ] Code examples are re-derived and runnable
+- [ ] The complete program appears at least once in one block (Go: `package main` + imports + `func main`)
 - [ ] Source URL credited in related links
 - [ ] Sign-off ritual present
 - [ ] `node scripts/validate-manifest.mjs {slug}` would pass

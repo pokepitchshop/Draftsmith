@@ -17,7 +17,7 @@ import { parseManifest, VALID_STATUSES } from "./manifest-schema.mjs";
 import { loadConfig, resolveStepSettings } from "./config.mjs";
 import { ollamaChat, estimateTokens, cleanModelOutput } from "./ollama.mjs";
 import { buildExportBody, buildTommarlerExport, parseFrontmatterReply } from "./export-markdown.mjs";
-import { extractCodeBlocks, checkCodeBlocks, buildCheckReport } from "./code-check.mjs";
+import { extractCodeBlocks, checkCodeBlocks, buildCheckReport, missingCompleteGo, applyBlockFixes } from "./code-check.mjs";
 
 const draftPath = (slug, file) => `articles/drafts/${slug}/${file}`;
 
@@ -318,17 +318,27 @@ function readDraftBody(slug, rootDir) {
  * the next run re-checks automatically once draft-v2.md is fixed.
  */
 async function codeCheckBuiltin({ step, slug, rootDir, onEvent }) {
-  const blocks = extractCodeBlocks(readFileSync(join(rootDir, draftPath(slug, "draft-v2.md")), "utf8"));
+  const draftFile = join(rootDir, draftPath(slug, "draft-v2.md"));
+  const draft = readFileSync(draftFile, "utf8");
+  const blocks = extractCodeBlocks(draft);
   onEvent?.({ type: "check", step: step.id, blocks: blocks.length });
   const outcome = await checkCodeBlocks(blocks);
+
+  // goimports fixes are written back so exports and readers get the corrected code (POK-639).
+  const fixes = new Map(outcome.results.filter((r) => r.fixedCode).map((r) => [r.line, r.fixedCode]));
+  if (fixes.size) writeFileSync(draftFile, applyBlockFixes(draft, blocks, fixes), "utf8");
   const report = buildCheckReport(slug, outcome);
   const failedPath = draftPath(slug, "code-check-failed.md");
   const { pass, warn, fail, skip } = outcome.counts;
   // Code blocks present but none checkable (all fragments / unsupported) must not read as a clean pass.
   const nothingChecked = skip > 0 && pass + warn + fail === 0;
-  const summary =
-    `${pass} passed, ${warn} warnings, ${fail} failed, ${skip} skipped` +
-    (nothingChecked ? " — nothing checkable, review code by hand" : "");
+  const noFullGo = missingCompleteGo(outcome.results);
+  const notes = [
+    fixes.size && `goimports fixed ${fixes.size} Go block(s) in draft-v2.md`,
+    nothingChecked && "nothing checkable, review code by hand",
+    noFullGo && "no complete Go program, add the full main.go",
+  ].filter(Boolean);
+  const summary = `${pass} passed, ${warn} warnings, ${fail} failed, ${skip} skipped` + (notes.length ? ` — ${notes.join("; ")}` : "");
 
   if (fail) {
     writeOutput(rootDir, failedPath, report);
@@ -341,7 +351,7 @@ async function codeCheckBuiltin({ step, slug, rootDir, onEvent }) {
 
   rmSync(join(rootDir, failedPath), { force: true });
   writeOutput(rootDir, step.output(slug), report);
-  return { handoff: false, provider: "builtin", written: [step.output(slug)], summary, warnings: warn + (nothingChecked ? 1 : 0) };
+  return { handoff: false, provider: "builtin", written: [step.output(slug)], summary, warnings: warn + notes.filter((n) => !n.startsWith("goimports")).length, fixed: fixes.size };
 }
 
 async function exportMediumBuiltin({ step, slug, rootDir }) {
