@@ -55,6 +55,8 @@ Then paste the printed prompt into Cursor chat. See [`docs/drop-link.md`](docs/d
 | `scripts/lib/pipeline.mjs` | Step registry + runner — steps, inputs, outputs, providers (POK-634) |
 | `draftsmith.config.json` | Provider/model per step; Ollama host + `num_ctx` (POK-635) |
 | `docs/local-ollama.md` | Run steps on a local Ollama GPU box (POK-635) |
+| `scripts/worker.mjs` | NAS inbox worker: link file → draft PR (POK-637) |
+| `deploy/nas/` | Worker Dockerfile, compose file, `.env.example` (POK-637) |
 | `docs/link-ingestion.md` | URL → source material router (POK-419) |
 | `docs/link-to-article.md` | Drop a link → draft workflow (POK-421) |
 | `docs/manifest-schema.md` | Manifest field reference + validation (POK-420) |
@@ -121,6 +123,17 @@ OLLAMA_HOST=gpu-box.local:11434 node scripts/draftsmith.mjs run <slug> --provide
 ```
 
 See [`docs/local-ollama.md`](docs/local-ollama.md).
+
+## NAS worker (POK-637)
+
+Drop a link file into `/volume1/docker/draftsmith/inbox/` on the NAS and get a draft PR back, generated on the local Ollama:
+
+```text
+https://go.dev/blog/routing-enhancements
+angle: Try Go 1.22 method + wildcard routing on a tiny API
+```
+
+See [`docs/nas-worker.md`](docs/nas-worker.md).
 
 ## X export (POK-379)
 

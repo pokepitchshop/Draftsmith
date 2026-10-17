@@ -1,0 +1,28 @@
+# Draftsmith NAS worker (POK-637). See docs/nas-worker.md.
+#
+# Layout on the NAS:
+#   /volume1/docker/draftsmith/
+#   ├── compose.yaml   (this file)
+#   ├── .env           (from .env.example; never committed)
+#   ├── app/           (repo snapshot used to build the image)
+#   ├── inbox/         (drop job files here)
+#   └── work/          (worker-owned clone)
+services:
+  worker:
+    build:
+      context: ./app
+      dockerfile: deploy/nas/Dockerfile
+    image: draftsmith-worker:latest
+    container_name: draftsmith-worker
+    restart: unless-stopped
+    # thomas.marler:users, so inbox files stay manageable over SMB
+    user: "1026:100"
+    env_file: .env
+    environment:
+      INBOX_DIR: /inbox
+      REPO_DIR: /work/repo
+      TZ: America/Chicago
+    volumes:
+      - ./inbox:/inbox
+      - ./work:/work
+    stop_grace_period: 30s
