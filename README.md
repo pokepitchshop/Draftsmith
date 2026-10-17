@@ -51,7 +51,8 @@ Then paste the printed prompt into Cursor chat. See [`docs/drop-link.md`](docs/d
 | `style/iostom-style-guide.md` | Technical article voice (POK-371) |
 | `docs/style-guide.md` | Style guide workflow and self-edit quick reference |
 | `docs/drop-link.md` | Drop-a-link CLI front door (POK-426) |
-| `scripts/draftsmith.mjs` | `new <url>` and `status <slug>` commands |
+| `scripts/draftsmith.mjs` | `new <url>`, `status <slug>`, and `run <slug>` commands |
+| `scripts/lib/pipeline.mjs` | Step registry + runner — steps, inputs, outputs, providers (POK-634) |
 | `docs/link-ingestion.md` | URL → source material router (POK-419) |
 | `docs/link-to-article.md` | Drop a link → draft workflow (POK-421) |
 | `docs/manifest-schema.md` | Manifest field reference + validation (POK-420) |

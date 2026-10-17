@@ -74,6 +74,14 @@ node scripts/draftsmith.mjs status <slug>
 
 Shows which files exist (`draft.md`, `draft-v2.md`, exports) and the next Cursor prompt.
 
+## Run the next step (POK-634)
+
+```bash
+node scripts/draftsmith.mjs run <slug> [--provider agent] [--until <step>] [--json]
+```
+
+Reads the step registry in `scripts/lib/pipeline.mjs`, skips steps whose output already exists, and hands off the next one. Phase 1 ships only the `agent` provider: it prints the Cursor prompt and stops. `--until self-edit` stops before that step (steps: `draft`, `self-edit`, `export-medium`, `export-tommarler`, `export-x`).
+
 ## JSON output
 
 For tooling or automation hooks:
