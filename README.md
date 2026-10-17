@@ -6,7 +6,7 @@ Linear project: [Draftsmith](https://linear.app/pokepitchshop/project/draftsmith
 
 GitHub: [github.com/pokepitchshop/Draftsmith](https://github.com/pokepitchshop/Draftsmith)
 
-Local path: `~/Desktop/pokepitchshop/draftsmith`
+Local path: `~/Desktop/pokepitchshop/AiBusiness/draftsmith`
 
 ## Workflow
 
