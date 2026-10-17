@@ -53,6 +53,8 @@ Then paste the printed prompt into Cursor chat. See [`docs/drop-link.md`](docs/d
 | `docs/drop-link.md` | Drop-a-link CLI front door (POK-426) |
 | `scripts/draftsmith.mjs` | `new <url>`, `status <slug>`, and `run <slug>` commands |
 | `scripts/lib/pipeline.mjs` | Step registry + runner — steps, inputs, outputs, providers (POK-634) |
+| `draftsmith.config.json` | Provider/model per step; Ollama host + `num_ctx` (POK-635) |
+| `docs/local-ollama.md` | Run steps on a local Ollama GPU box (POK-635) |
 | `docs/link-ingestion.md` | URL → source material router (POK-419) |
 | `docs/link-to-article.md` | Drop a link → draft workflow (POK-421) |
 | `docs/manifest-schema.md` | Manifest field reference + validation (POK-420) |
@@ -109,6 +111,16 @@ node scripts/prepare-link-draft.mjs https://github.com/gorilla/mux --slug go-gor
 Then run `prompts/07-draft-from-link.md` in Cursor. Sample: `articles/drafts/go-gorilla-mux-url-params/`.
 
 See [`docs/link-to-article.md`](docs/link-to-article.md) and [`docs/manifest-schema.md`](docs/manifest-schema.md).
+
+## Local Ollama (POK-635)
+
+Run pipeline steps on your own GPU, with no hosted model API:
+
+```bash
+OLLAMA_HOST=gpu-box.local:11434 node scripts/draftsmith.mjs run <slug> --provider ollama --until export-x
+```
+
+See [`docs/local-ollama.md`](docs/local-ollama.md).
 
 ## X export (POK-379)
 
