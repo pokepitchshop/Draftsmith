@@ -25,6 +25,17 @@ function extractTitle(markdown, fallback) {
   return match ? match[1].trim() : fallback;
 }
 
+/**
+ * Jina's `Title:` header line, minus a trailing " - Site Name" / " | Site Name"
+ * (only when what remains is still a real title).
+ */
+export function jinaTitle(raw) {
+  const title = raw.match(/^Title:\s*(.+)$/m)?.[1]?.trim();
+  if (!title) return null;
+  const trimmed = title.replace(/\s+[-|–—]\s+[^-|–—]+$/, "").trim();
+  return trimmed.split(/\s+/).length >= 3 ? trimmed : title;
+}
+
 async function fetchJina(url) {
   const jinaUrl = `${JINA_BASE}${url}`;
   const headers = {
@@ -41,13 +52,14 @@ async function fetchJina(url) {
     throw new Error(`Jina Reader failed (${response.status}): ${response.statusText}`);
   }
 
-  const markdown = stripBoilerplate(await response.text());
+  const raw = await response.text();
+  const markdown = stripBoilerplate(raw);
   if (!markdown || markdown.length < 80) {
     throw new Error("Jina Reader returned empty or very short content");
   }
 
   return {
-    title: extractTitle(markdown, url),
+    title: extractTitle(markdown, jinaTitle(raw) ?? url),
     markdown,
     engine: "jina",
   };
